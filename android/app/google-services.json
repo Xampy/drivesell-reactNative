@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "242538273665",
+    "project_id": "drivesell-fae6f",
+    "storage_bucket": "drivesell-fae6f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242538273665:android:923692685770cb69b22680",
+        "android_client_info": {
+          "package_name": "com.drivesell"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "242538273665-4sjskcala5cogh57e1d9rl7do3v2vr82.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTgWAIN7wML9Q3spg_6MwnoSubczxHLc8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "242538273665-4sjskcala5cogh57e1d9rl7do3v2vr82.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
