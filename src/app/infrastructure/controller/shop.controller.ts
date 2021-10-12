@@ -14,7 +14,10 @@ interface CreateUserShopRequestInterface {
     shopDescription: string,
     shopCity: string,
     shopProvinceOrRegion: string,
-    shopCountry: string
+    shopCountry: string,
+
+    latitude: string,
+    longitude: string
 }
 
 interface UpdateUserShopRequestInterface {
@@ -37,7 +40,12 @@ export default class ShopController {
 
         const useCaseRequest = new CreateShopUseCaseRequest(
             input.shopName, input.shopDescription,
-            input.shopCity, input.shopProvinceOrRegion, input.shopCountry);
+            input.shopCity, input.shopProvinceOrRegion, input.shopCountry,
+            input.latitude,
+            input.longitude);
+        
+        console.log("\n\nCreate use case request");
+        console.log(input);
 
         const useCase = new CreateShopUseCase();
 

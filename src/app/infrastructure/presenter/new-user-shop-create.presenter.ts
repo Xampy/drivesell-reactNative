@@ -19,7 +19,7 @@ export default class NewUserShopCreatePresenter implements NewUserShopCreatePres
             if(this.viewModel != null)
                 this.viewModel.setShopValue(response.getShop());
         }else {
-            console.log("There was an error", response.getError());
+            console.log("[Create Shop Presenter] There was an error", response.getError());
         }
     }
 }

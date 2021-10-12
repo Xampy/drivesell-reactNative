@@ -23,7 +23,9 @@ class CreateShopUseCase {
             useCaseRequest.getDescription(),
             useCaseRequest.getCity(),
             useCaseRequest.getProvinceOrRegion(),
-            useCaseRequest.getCountry()
+            useCaseRequest.getCountry(),
+            useCaseRequest.getLatitude(),
+            useCaseRequest.getLongitude()
         );
         console.log("In create shop use case", request);
 

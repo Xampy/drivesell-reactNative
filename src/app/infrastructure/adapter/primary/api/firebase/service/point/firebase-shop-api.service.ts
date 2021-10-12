@@ -50,7 +50,9 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
             firestore().collection(path).doc(request.getShop().getId()).update(
                 {
                     name: request.getShop().getName(),
-                    description: request.getShop().getDescription()
+                    description: request.getShop().getDescription(),
+                    latitude: request.getShop().getLatitude(),
+                    longitude: request.getShop().getLongitude()
                 }
             ).then(
                 () => {
@@ -78,7 +80,9 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
         firestore().collection(path).add(
             {
                 name: request.getName(),
-                description: request.getDescription()
+                description: request.getDescription(),
+                latitude: request.getLatitude(),
+                longitude: request.getLongitude()
             }
         ).then(
             (value) => {
@@ -92,6 +96,9 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
                     request.getCountry()
 
                 )
+
+                shop.setLatitude(request.getLatitude());
+                shop.setLongitude(request.getLongitude());
 
                 shop.setId(value.id);
 

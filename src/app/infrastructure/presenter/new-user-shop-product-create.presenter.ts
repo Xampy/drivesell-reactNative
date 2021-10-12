@@ -19,7 +19,7 @@ export default class NewUserShopProductCreatePresenter implements NewUserShopPro
             if(this.viewModel != null)
                 this.viewModel.setShopProductValue(response.getShopProduct());
         }else {
-            console.log("There was an error", response.getError());
+            console.log("[Create Shop Product Presenter] Error occured", response.getError());
         }
     }
 }

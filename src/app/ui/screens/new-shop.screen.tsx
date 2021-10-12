@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Dialog from "react-native-dialog";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { connect } from 'react-redux';
 import { AppContextInterface } from '../../app.context';
@@ -7,6 +8,8 @@ import ShopEntity from '../../domain/entity/shop.entity';
 import NewUserShopCreatePresenter, { NewShopViewModel } from '../../infrastructure/presenter/new-user-shop-create.presenter';
 import MenuWithTitleTopBarComponent from '../components/core/menu-with-tile-top-bar.component';
 import { ADD_USER_SHOP, UserShopActionType } from '../store/myShop/type';
+import Geolocation from 'react-native-geolocation-service';
+import { requestLocationPermission } from '../location.tools';
 
 interface IProps {
     context?: AppContextInterface,
@@ -15,7 +18,8 @@ interface IProps {
 }
 
 interface IState {
-    step: number
+    step: number,
+    beInShopDialog: boolean
 }
 
 class NewShopScreen extends React.Component<IProps, IState> {
@@ -26,13 +30,17 @@ class NewShopScreen extends React.Component<IProps, IState> {
     private shopProvinceOrRegion;
     private shopCountry;
     private createUserShopViewModel: NewShopViewModel;
+    private hasLocationPermission: Promise<boolean | null> | null;
 
     constructor(props: any) {
         super(props);
 
         this.state = {
-            step: 1
+            step: 1,
+            beInShopDialog: false
         }
+
+        this.hasLocationPermission = null;
 
         this.shopName = "";
         this.shopDescription = "";
@@ -53,8 +61,8 @@ class NewShopScreen extends React.Component<IProps, IState> {
                     }
                     if (this.props.dispatch != undefined) {
                         this.props.dispatch(action);
-                        
-                        if(this.props.navigation != undefined)
+
+                        if (this.props.navigation != undefined)
                             this.props.navigation.navigate("My Shops");
                     }
                 }
@@ -69,31 +77,60 @@ class NewShopScreen extends React.Component<IProps, IState> {
         console.log("\n\n\n\nIn new shop", this.props.navigation);
         console.log("\n\n\n\nNew shop screen ", Object.keys(this.props));
         console.table(Object.keys(this.props));
+
+        this.hasLocationPermission = requestLocationPermission();
+
     }
 
+
+    private _saveShop = () => {
+
+    }
     private _handleCreateShopBtnClick = () => {
         if (this.shopName.length > 0 &&
             this.shopDescription.length >= 0 &&
             this.shopCountry.length > 0 &&
             this.shopProvinceOrRegion.length > 0 &&
             this.shopCity.length > 0) {
-            if (this.props.context != undefined) {
 
-                this.props.context.appContainer
-                    .controllerFactory.getShopController()
-                    .createShop(
-                        {
-                            shopName: this.shopName,
-                            shopDescription: this.shopDescription,
-                            shopCity: this.shopCity,
-                            shopProvinceOrRegion: this.shopProvinceOrRegion,
-                            shopCountry: this.shopCountry
-                        },
-                        new NewUserShopCreatePresenter(this.createUserShopViewModel)
-                    );
+            if (this.hasLocationPermission) {
+                Geolocation.getCurrentPosition(
+                    (position) => {
+                        console.log(position);
+                        console.log(position.coords.latitude.toString());
+
+                        if (this.props.context != undefined) {
+                            this.props.context.appContainer
+                                .controllerFactory.getShopController()
+                                .createShop(
+                                    {
+                                        shopName: this.shopName,
+                                        shopDescription: this.shopDescription,
+                                        shopCity: this.shopCity,
+                                        shopProvinceOrRegion: this.shopProvinceOrRegion,
+                                        shopCountry: this.shopCountry,
+
+                                        latitude: position.coords.latitude.toString(),
+                                        longitude: `${position.coords.longitude}`
+                                    },
+                                    new NewUserShopCreatePresenter(this.createUserShopViewModel)
+                                );
+
+                        } else {
+                            console.log("Hop name length not allowed");
+                        }
+
+                    },
+                    (error) => {
+                        // See error code charts below.
+                        console.log(error.code, error.message);
+                    },
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+                );
+
             }
-        } else {
-            console.log("Hop name length not allowed");
+
+
         }
     }
 
@@ -172,9 +209,26 @@ class NewShopScreen extends React.Component<IProps, IState> {
 
     private _toggleDrawerNavigation = () => {
         console.log(this.props);
-        if(this.props.navigation != undefined)
+        if (this.props.navigation != undefined)
             this.props.navigation.toggleDrawer();
     }
+
+    private _renderDialog = () => {
+        return (
+            <Dialog.Container visible={this.state.beInShopDialog}>
+                <Dialog.Title>Warning</Dialog.Title>
+                <Dialog.Description>
+                    For that we need to access your current location.
+                </Dialog.Description>
+                <Dialog.Button label="OK" onPress={
+                    () => {
+                        this.setState({ beInShopDialog: false });
+                    }} />
+            </Dialog.Container>
+        );
+    }
+
+
 
 
 
@@ -183,8 +237,12 @@ class NewShopScreen extends React.Component<IProps, IState> {
             <View style={styles.container}>
                 <MenuWithTitleTopBarComponent toggler={this._toggleDrawerNavigation} title={"New Shop"} />
 
+                {this._renderDialog()}
                 <View style={styles.data_container}>
                     <View style={styles.input_container}>
+                        <View style={{ marginBottom: 20 }}>
+                            <Text>You need to be in your shop in order to use your shop location.</Text>
+                        </View>
                         <TouchableOpacity style={{ marginBottom: 20 }}
                             onPress={
                                 () => {
