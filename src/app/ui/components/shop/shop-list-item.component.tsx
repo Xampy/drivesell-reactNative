@@ -9,7 +9,8 @@ interface IProps {
     name: string,
     description: string,
     distance: number,
-    time: number
+    time: number,
+    location?: string
 }
 
 interface IState {
@@ -55,6 +56,10 @@ class ShopListItemComponent extends React.Component<IProps, IState> {
                         }}>
                             <MaterialCommunityIcons name="map-marker-distance" size={20} />
                             <Text style={{ marginLeft: 15 }}>{this.props.distance} km</Text>
+                        </View>
+
+                        <View>
+
                         </View>
                         <View style={{
                             marginLeft: 20,

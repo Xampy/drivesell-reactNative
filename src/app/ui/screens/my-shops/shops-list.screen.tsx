@@ -26,12 +26,23 @@ class ShopsListScreen extends React.Component<IProps, IState> {
         console.log("My Shops list : ", this.props);
     }
 
+
+    private _updateShop = (shop: ShopEntity) => {
+        if(this.props.navigation != undefined)
+            this.props.navigation.navigate(
+                "Shop-Update-Screen", 
+                {
+                    shop: shop
+                }
+            )
+    }
+
     private _renderShop = ({item}: any) => {
         console.log(item);
         return (
             <TouchableOpacity onPress={
                 () => {
-                    
+                    this._updateShop(item);
                 }
             }>
                 <ShopListItemComponent 
@@ -40,6 +51,8 @@ class ShopsListScreen extends React.Component<IProps, IState> {
             </TouchableOpacity>
         );  
     }
+
+    
 
     private _toggleDrawerNavigation = () => {
         console.log(this.props);

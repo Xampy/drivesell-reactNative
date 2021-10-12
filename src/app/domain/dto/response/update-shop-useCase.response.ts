@@ -1,7 +1,6 @@
 import ShopEntity from "../../entity/shop.entity";
 
-
-export default class CreateShopUseCaseResponse {
+export default class UpdateShopUseCaseResponse {
     private error: Error | null;
     private shop: null | ShopEntity;
 

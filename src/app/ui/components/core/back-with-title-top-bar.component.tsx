@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 
@@ -9,7 +9,8 @@ const iconName: string = "ios-information-circle";
 
 
 interface IProps {
-    title: string
+    title: string,
+    backCallback: Function
 }
 
 interface IState {
@@ -22,11 +23,19 @@ class BackWithTitleTopBarComponent extends React.Component<IProps, IState> {
         super(props);
     }
 
+
     render() {
         return (
             <View style={styles.container} >
                 <View>
-                    <AntDesign name={"arrowleft"} size={30} color={"#000000"} />
+                    <TouchableOpacity onPress={() => {
+                        this.props.backCallback();
+                            
+                    }}>
+                        <AntDesign name={"arrowleft"} size={30} color={"#000000"} />
+                    </TouchableOpacity>
+
+                    
                 </View>
                 <View>
                     <Text style={styles.title}>{this.props.title}</Text>

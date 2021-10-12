@@ -2,11 +2,11 @@ import { ShopProductEntityInterface } from "../../../entity/product.entity";
 
 
 export interface StorageShop {
-    name: string,
-    description: string,
-    city: string,
-    country: string,
-    provinceOrRegion: string,
+    name: string|undefined,
+    description: string|undefined,
+    city: string|undefined,
+    country: string|undefined,
+    provinceOrRegion: string|undefined,
     id: string | undefined
 }
 

@@ -10,4 +10,10 @@ interface AddUserShopType {
     payload: ShopEntity
 }
 
-export type UserShopActionType = AddUserShopType; 
+export const UPDATE_USER_SHOP = "UPDATE_USER_SHOP";
+interface UpdateUserShopType {
+    type: typeof UPDATE_USER_SHOP,
+    payload: ShopEntity
+}
+
+export type UserShopActionType = AddUserShopType | UpdateUserShopType; 
