@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { TouchableOpacity, View, FlatList, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import ShopEntity from '../../domain/entity/shop.entity';
-import MenuWithTitleTopBarComponent from '../components/core/menu-with-tile-top-bar.component';
-import ShopListItemComponent from '../components/shop/shop-list-item.component';
-import { RootStateType } from '../store';
-import { UserShopActionType } from '../store/myShop/type';
+import ShopEntity from '../../../domain/entity/shop.entity';
+import MenuWithTitleTopBarComponent from '../../components/core/menu-with-tile-top-bar.component';
+import ShopListItemComponent from '../../components/shop/shop-list-item.component';
+import { RootStateType } from '../../store';
+import { UserShopActionType } from '../../store/myShop/type';
 
 
 interface IProps {

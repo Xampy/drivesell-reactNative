@@ -102,7 +102,7 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
 
     private _renderShopChoices = () => {
 
-        const res = [<Picker.Item label={"All"} value={'all'} />];
+        const res = [<Picker.Item key="all" label={"All"} value={'all'} />];
 
         return res.concat(this.props.shops.map(
             (shop) => <Picker.Item key={shop.getId()} label={shop.getName()} value={shop.getId()} />

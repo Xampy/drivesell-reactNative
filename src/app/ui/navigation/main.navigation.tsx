@@ -14,7 +14,7 @@ import SearchScreen from "../screens/home/search/search.screen";
 import NewShopScreen from "../screens/new-shop.screen";
 import AppContext from "../../app.context";
 import ShopItemsListScreen from "../screens/shop-items-list.screen";
-import ShopsListScreen from "../screens/shops-list.screen";
+import MyShopsStackNavigator from "./my-shops.navigation";
 
 
 const MainDrawer = createDrawerNavigator();
@@ -115,7 +115,7 @@ const MainDrawerNavigator = () => {
                     component={ShopItemsListScreen} />
                 <MainDrawer.Screen
                     name="My Shops"
-                    component={ShopsListScreen} />
+                    component={MyShopsStackNavigator} />
                 <MainDrawer.Screen
                     name="Sell Orders"
                     component={SellOrdersStackNavigator} />
