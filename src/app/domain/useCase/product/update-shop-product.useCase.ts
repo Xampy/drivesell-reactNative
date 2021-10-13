@@ -56,7 +56,9 @@ class UpdateShopProductUseCase {
 
         //Store the data to local storage
         if (result.getShopProduct() != null) {
-            const shopsProducts = storageFactory.getLocalStorage().storage.shopsProducts;
+            let shopsProducts = storageFactory.getLocalStorage().storage.shopsProducts;
+            shopsProducts = shopsProducts.filter( (sp) => sp.id != result.getShopProduct()?.getId() );
+            
             shopsProducts.push(
                 {
                     name: result.getShopProduct()?.getName(),
@@ -72,7 +74,8 @@ class UpdateShopProductUseCase {
                     subTwoImage: result.getShopProduct()?.getSubTwoImage(),
                     subThreeImage: result.getShopProduct()?.getSubThreeImage(),
 
-                    shopId: result.getShopProduct()?.getShopId()
+                    shopId: result.getShopProduct()?.getShopId(),
+                    id: result.getShopProduct()?.getId()
                 }
             )
 

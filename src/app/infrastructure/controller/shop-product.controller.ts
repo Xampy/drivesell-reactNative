@@ -1,11 +1,14 @@
 import CreateShopProductUseCaseRequest from "../../domain/dto/request/create-shop-product-useCase.request";
+import DeleteShopProductUseCaseRequest from "../../domain/dto/request/delete-shop-product-useCase.request";
 import UpdateShopProductUseCaseRequest from "../../domain/dto/request/update-shop-product-useCase.request";
 import ShopProductEntity from "../../domain/entity/product.entity";
 import ShopEntity from "../../domain/entity/shop.entity";
 import { ApiFactoryInterface } from "../../domain/port/primary/api/api-factory.interface";
 import CreateShopProductUseCase from "../../domain/useCase/product/create-shop-product.useCase";
+import DeleteShopProductUseCase from "../../domain/useCase/product/delete-shop-product.useCase";
 import UpdateShopProductUseCase from "../../domain/useCase/product/update-shop-product.useCase";
 import StorageFactory from "../adapter/secondary/storage/storage-factory.interface";
+import DeleteShopProductPresenter from "../presenter/delete-shop-product.presenter";
 import NewUserShopProductCreatePresenter from "../presenter/new-user-shop-product-create.presenter";
 import UpdateShopProductPresenter from "../presenter/update-shop-product.presenter";
 
@@ -18,6 +21,11 @@ interface UpdateUserShopProductRequestInterface {
     shop: ShopEntity,
     product: ShopProductEntity;
     lastShopId: string | null
+}
+
+interface DeleteUserShopProductRequestInterface {
+    shop: ShopEntity,
+    product: ShopProductEntity
 }
 
 export default class ShopProductController {
@@ -49,6 +57,18 @@ export default class ShopProductController {
         );
 
         const useCase = new UpdateShopProductUseCase();
+
+        useCase.execute(useCaseRequest, this.storageFactory, this.apiFactory, presenter);
+    }
+
+    public deleteShopProduct(input: DeleteUserShopProductRequestInterface,
+        presenter: DeleteShopProductPresenter) {
+
+        const useCaseRequest = new DeleteShopProductUseCaseRequest(
+            input.product, input.shop
+        );
+
+        const useCase = new DeleteShopProductUseCase();
 
         useCase.execute(useCaseRequest, this.storageFactory, this.apiFactory, presenter);
     }

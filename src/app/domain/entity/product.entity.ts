@@ -1,5 +1,6 @@
 
 export interface ShopProductEntityInterface {
+    id: string | undefined,
     name: string | undefined,
     price: number | undefined,
     reduction: number | undefined,

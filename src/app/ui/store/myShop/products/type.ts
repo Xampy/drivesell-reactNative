@@ -17,4 +17,10 @@ interface UpdateUserShopProductType {
     type: typeof UPDATE_USER_SHOP_PRODUCT,
     payload: {product: ShopProductEntity, lastShopId: string, lastId: string}
 }
-export type UserShopsProductsActionType = AddUserShopProductType | UpdateUserShopProductType; 
+
+export const DELETE_USER_SHOP_PRODUCT = "DELETE_USER_SHOP_PRODUCT";
+interface DeleteUserShopProductType {
+    type: typeof DELETE_USER_SHOP_PRODUCT,
+    payload: ShopProductEntity
+}
+export type UserShopsProductsActionType = AddUserShopProductType | UpdateUserShopProductType | DeleteUserShopProductType; 

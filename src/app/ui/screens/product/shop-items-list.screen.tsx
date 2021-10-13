@@ -1,17 +1,22 @@
 import { Picker } from "@react-native-picker/picker";
 import * as React from "react";
 import { View, Image, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
+import { AppContextInterface } from "../../../app.context";
 import ShopProductEntity from "../../../domain/entity/product.entity";
 import ShopEntity from "../../../domain/entity/shop.entity";
+import DeleteShopProductPresenter, { DeleteShopProductViewModel } from "../../../infrastructure/presenter/delete-shop-product.presenter";
 import BackWithTitleTopBarComponent from "../../components/core/back-with-title-top-bar.component";
 import MenuWithTitleTopBarComponent from "../../components/core/menu-with-tile-top-bar.component";
 import { RootStateType } from "../../store";
+import { DELETE_USER_SHOP_PRODUCT, UserShopsProductsActionType } from "../../store/myShop/products/type";
 
 const product_image = require("../../../../assets/img/product/product_main.jpg");
 
 interface IProps {
+    context: AppContextInterface,
     navigation: any,
+    dispatch: (action: any) => void,
     shops: ShopEntity[],
     shopsProducts: ShopProductEntity[]
 }
@@ -23,6 +28,10 @@ interface IState {
 
 class ShopItemsListScreen extends React.Component<IProps, IState> {
 
+    private deleteShopProductViewModel: DeleteShopProductViewModel;
+    private shopProductToDelete: ShopProductEntity | null;
+    private hasDeletedProduct: boolean;
+
     constructor(props: any) {
         super(props);
 
@@ -30,9 +39,52 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
 
         console.log("\n\n", this.props.shops)
 
+        //const state = useSelector(state => state.)
         this.state = {
-            filteredhopsProducts: [...this.props.shopsProducts],
+            filteredhopsProducts: this.props.shopsProducts,
             shopSelected: 'all'
+        };
+
+        this.shopProductToDelete = null;
+        this.hasDeletedProduct = false;
+
+        this.deleteShopProductViewModel = {
+            setErrorValue: (error) => {
+                if (error == null) {
+                    //Success delete
+                    this.hasDeletedProduct = true;
+
+                    if (this.shopProductToDelete != null) {
+                        let action: UserShopsProductsActionType = {
+                            type: DELETE_USER_SHOP_PRODUCT,
+                            payload: this.shopProductToDelete
+                        }
+
+                        if (this.props.dispatch != null) {
+                            this.props.dispatch(action);
+                        }
+                    } else {
+                        console.log("Shop to delete is null ? " + this.shopProductToDelete == null);
+                    }
+
+
+                }
+            }
+        }
+    }
+
+    componentDidMount() {
+        console.log(this.state);
+    }
+
+    componentDidUpdate() {
+        const s = this.state.shopSelected;
+        if (this.hasDeletedProduct == true) {
+            this.hasDeletedProduct = false;
+            this.setState({
+                filteredhopsProducts: this.props.shopsProducts,
+                shopSelected: s
+            });
         }
     }
 
@@ -41,7 +93,7 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
 
         if (itemValue == 'all') {
             this.setState({
-                filteredhopsProducts: [...this.props.shopsProducts],
+                filteredhopsProducts: this.props.shopsProducts,
                 shopSelected: 'all'
             });
         } else {
@@ -54,6 +106,7 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
 
     private _handleUpdateProductClick = (p: ShopProductEntity) => {
         if (this.props.navigation != undefined) {
+            this.shopProductToDelete = p;
             this.props.navigation.navigate(
                 "Shop-Product-Update-Screen",
                 {
@@ -63,8 +116,23 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
         }
     }
 
+    private _handleDeleteProductClick = (p: ShopProductEntity) => {
+        if (this.props.context != undefined) {
+            this.props.context.appContainer.controllerFactory
+                .getShopProductController()
+                .deleteShopProduct(
+                    {
+                        product: p,
+                        shop: this.props.shops.filter((s) => s.getId() === p.getShopId())[0],
+                    },
+                    new DeleteShopProductPresenter(this.deleteShopProductViewModel)
+                )
+        }
+    }
+
     private _renderProducts = () => {
-        if (this.state.filteredhopsProducts.length > 0) {
+        //this.state.filteredhopsProducts.length > 0
+        if (true) {
             return this.state.filteredhopsProducts.map(
                 (item) => {
 
@@ -85,12 +153,14 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
                                 <Text style={styles.product_description} >{item.getDescription()}</Text>
 
                                 <View style={{ display: 'flex', flexDirection: "row" }}>
-                                    <TouchableOpacity onPress={()=>{
+                                    <TouchableOpacity onPress={() => {
                                         this._handleUpdateProductClick(item);
                                     }}>
                                         <Text style={[styles.product_remove_btn, { backgroundColor: "blue" }]}>&times; Update</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={() => {
+                                        this._handleDeleteProductClick(item);
+                                    }}>
                                         <Text style={styles.product_remove_btn}>&times; Remove</Text>
                                     </TouchableOpacity>
                                 </View>

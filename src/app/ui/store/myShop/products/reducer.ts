@@ -1,4 +1,4 @@
-import { ADD_USER_SHOP_PRODUCT, UPDATE_USER_SHOP_PRODUCT, UserShopsProductsActionType, UserShopsProductsStateInterface } from "./type";
+import { ADD_USER_SHOP_PRODUCT, DELETE_USER_SHOP_PRODUCT, UPDATE_USER_SHOP_PRODUCT, UserShopsProductsActionType, UserShopsProductsStateInterface } from "./type";
 
 const initialState: UserShopsProductsStateInterface = {
     shopsProducts: []
@@ -18,18 +18,26 @@ export default function userShopsProductsReducer(
             };
         case UPDATE_USER_SHOP_PRODUCT:
             console.log("action " + UPDATE_USER_SHOP_PRODUCT);
-            
-            const res = state.shopsProducts.map(
+
+            let res = state.shopsProducts.map(
                 (p) => {
-                    if(p.getId() == action.payload.lastId && 
-                        p.getShopId() == action.payload.lastId){
-                            return action.payload.product;
-                        }
+                    if (p.getId() == action.payload.lastId &&
+                        p.getShopId() == action.payload.lastId) {
+                        return action.payload.product;
+                    }
                     else return p;
                 }
             )
             return {
                 shopsProducts: [...res]
+            };
+        case DELETE_USER_SHOP_PRODUCT:
+            console.log("action " + DELETE_USER_SHOP_PRODUCT);
+
+            return {
+                shopsProducts: state.shopsProducts.filter(
+                    (p) => p.getId() != action.payload.getId()
+                )
             };
         default:
             return state;

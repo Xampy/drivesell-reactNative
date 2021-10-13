@@ -8,6 +8,8 @@ import firestore from '@react-native-firebase/firestore';
 import ShopProductEntity from "../../../../../../../domain/entity/product.entity";
 import UpdateShopProductFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/product/update-shop-product-firebase.request";
 import UpdateShopProductFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/product/update-shop-product-firebase.response";
+import DeleteShopProductFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/product/delete-shop-product-firebase.request";
+import DeleteShopProductFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/product/delete-shop-product-firebase.response";
 
 export default class FirebaseShopProductApiService implements FirebaseShopProductApiServiceInterface {
 
@@ -34,6 +36,48 @@ export default class FirebaseShopProductApiService implements FirebaseShopProduc
                     resolve, reject);
             }
         );
+    }
+
+    public delete(request: DeleteShopProductFirebaseRequest) {
+        console.log("\n\nIn firebase update shop product");
+        console.log(request);
+
+        return new Promise<DeleteShopProductFirebaseResponse>(
+            (resolve, reject) => {
+                this.handleDeleteShopProduct(
+                    request,
+                    resolve, reject);
+            }
+        );
+    }
+
+
+    private handleDeleteShopProduct(request: DeleteShopProductFirebaseRequest,
+        resolve: Function, reject: Function) {
+
+        let response: DeleteShopProductFirebaseResponse;
+
+        const path: string = "" + request.getShop().getCountry() + "_" +
+            request.getShop().getProvinceOrRegion() + "_" +
+            request.getShop().getCity() + "_shops";
+
+        console.log("Firebase delete shop Product request\n", request);
+
+
+        firestore().collection(path).doc(request.getShop().getId())
+            .collection("products").doc(request.getProduct().getId()).delete()
+            .then(
+                (value) => {
+                    console.log("\n Shop Product updated");
+
+                    response = new DeleteShopProductFirebaseResponse(null);
+                    resolve(response);
+                }
+            ).catch(
+                (error) => {
+                    reject(error);
+                }
+            )
     }
 
 
@@ -80,7 +124,7 @@ export default class FirebaseShopProductApiService implements FirebaseShopProduc
                         reject(error);
                     }
                 )
-        }else {
+        } else {
             //The product was assigned to a new shop
 
             //TODO move the product to another place

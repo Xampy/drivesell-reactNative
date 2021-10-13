@@ -66,7 +66,8 @@ class CreateShopProductUseCase {
                     subTwoImage: result.getShopProduct()?.getSubTwoImage(),
                     subThreeImage: result.getShopProduct()?.getSubThreeImage(),
 
-                    shopId: result.getShopProduct()?.getShopId()
+                    shopId: result.getShopProduct()?.getShopId(),
+                    id: result.getShopProduct()?.getId()
                 }
             )
 

@@ -1,6 +1,6 @@
 import ShopProductEntity from "../../../../domain/entity/product.entity";
 import ShopEntity from "../../../../domain/entity/shop.entity";
-import { ADD_USER_SHOP_PRODUCT, UPDATE_USER_SHOP_PRODUCT, UserShopsProductsActionType } from "./type";
+import { ADD_USER_SHOP_PRODUCT, DELETE_USER_SHOP_PRODUCT, UPDATE_USER_SHOP_PRODUCT, UserShopsProductsActionType } from "./type";
 
 
 export function addUserShopProduct(product: ShopProductEntity): UserShopsProductsActionType {
@@ -14,5 +14,13 @@ export function updateUserShopProduct(product: ShopProductEntity, lastShopId: st
     return {
         type: UPDATE_USER_SHOP_PRODUCT,
         payload: {product: product, lastShopId: lastShopId, lastId: lastId}
+    }
+}
+
+
+export function deleteUserShopProduct(product: ShopProductEntity): UserShopsProductsActionType {
+    return {
+        type: DELETE_USER_SHOP_PRODUCT,
+        payload: product
     }
 }
