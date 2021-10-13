@@ -2,13 +2,13 @@ import { Picker } from "@react-native-picker/picker";
 import * as React from "react";
 import { View, Image, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { connect } from "react-redux";
-import ShopProductEntity from "../../domain/entity/product.entity";
-import ShopEntity from "../../domain/entity/shop.entity";
-import BackWithTitleTopBarComponent from "../components/core/back-with-title-top-bar.component";
-import MenuWithTitleTopBarComponent from "../components/core/menu-with-tile-top-bar.component";
-import { RootStateType } from "../store";
+import ShopProductEntity from "../../../domain/entity/product.entity";
+import ShopEntity from "../../../domain/entity/shop.entity";
+import BackWithTitleTopBarComponent from "../../components/core/back-with-title-top-bar.component";
+import MenuWithTitleTopBarComponent from "../../components/core/menu-with-tile-top-bar.component";
+import { RootStateType } from "../../store";
 
-const product_image = require("../../../assets/img/product/product_main.jpg");
+const product_image = require("../../../../assets/img/product/product_main.jpg");
 
 interface IProps {
     navigation: any,
@@ -52,6 +52,17 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
         }
     }
 
+    private _handleUpdateProductClick = (p: ShopProductEntity) => {
+        if (this.props.navigation != undefined) {
+            this.props.navigation.navigate(
+                "Shop-Product-Update-Screen",
+                {
+                    product: p
+                }
+            );
+        }
+    }
+
     private _renderProducts = () => {
         if (this.state.filteredhopsProducts.length > 0) {
             return this.state.filteredhopsProducts.map(
@@ -74,7 +85,9 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
                                 <Text style={styles.product_description} >{item.getDescription()}</Text>
 
                                 <View style={{ display: 'flex', flexDirection: "row" }}>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={()=>{
+                                        this._handleUpdateProductClick(item);
+                                    }}>
                                         <Text style={[styles.product_remove_btn, { backgroundColor: "blue" }]}>&times; Update</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity>

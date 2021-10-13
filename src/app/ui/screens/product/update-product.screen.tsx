@@ -8,19 +8,19 @@ import Dialog from "react-native-dialog";
 import DocumentPicker from 'react-native-document-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Octicons from 'react-native-vector-icons/Octicons';
-import ProductImagesComponent from '../components/product/product-images.component';
-import { RootStateType } from '../store';
 import { connect } from 'react-redux';
-import MenuWithTitleTopBarComponent from '../components/core/menu-with-tile-top-bar.component';
-import ShopEntity from '../../domain/entity/shop.entity';
-import ShopProductEntity from '../../domain/entity/product.entity';
-import { AppContextInterface } from '../../app.context';
-import NewUserShopProductCreatePresenter, { NewShopProductViewModel } from '../../infrastructure/presenter/new-user-shop-product-create.presenter';
-import { ADD_USER_SHOP_PRODUCT, UserShopsProductsActionType } from '../store/myShop/products/type';
+import { AppContextInterface } from '../../../app.context';
+import ShopProductEntity from '../../../domain/entity/product.entity';
+import ShopEntity from '../../../domain/entity/shop.entity';
+import NewUserShopProductCreatePresenter, { NewShopProductViewModel } from '../../../infrastructure/presenter/new-user-shop-product-create.presenter';
+import MenuWithTitleTopBarComponent from '../../components/core/menu-with-tile-top-bar.component';
+import ProductImagesComponent from '../../components/product/product-images.component';
+import { RootStateType } from '../../store';
+import { UserShopsProductsActionType, ADD_USER_SHOP_PRODUCT, UPDATE_USER_SHOP_PRODUCT } from '../../store/myShop/products/type';
+import BackWithTitleTopBarComponent from '../../components/core/back-with-title-top-bar.component';
+import UpdateShopProductPresenter, { UpdateShopProductViewModel } from '../../../infrastructure/presenter/update-shop-product.presenter';
 
-
-
-const user_icon = require('../../../assets/img/user_icon.png');
+const user_icon = require('../../../../assets/img/user_icon.png');
 
 
 
@@ -28,6 +28,7 @@ const user_icon = require('../../../assets/img/user_icon.png');
 interface IProps {
     context: AppContextInterface;
     navigation: any,
+    route: any,
     shops: ShopEntity[],
     dispatch: (action: UserShopsProductsActionType) => void
 }
@@ -53,10 +54,11 @@ interface IState {
 
 
     openEditor: boolean,
-    showSuccessDialog: boolean
+    showSuccessDialog: boolean,
+    selectedShop: string
 }
 
-class NewProductScreen extends React.Component<IProps, IState> {
+class UpdateShopProductScreen extends React.Component<IProps, IState> {
 
     private productName: string;
     private productPrice: number;
@@ -66,11 +68,16 @@ class NewProductScreen extends React.Component<IProps, IState> {
     private newProductDetailText: string;
     private newProductShippingDetailText: string;
     private shopProduct: ShopProductEntity;
-    private createShopProductViewModel: NewShopProductViewModel;
+    private shopIdBackuped: string;
+    private updateShopProductViewModel: UpdateShopProductViewModel;
+
 
 
     constructor(props: any) {
         super(props);
+
+
+        this.shopProduct = this.props.route?.params.product != undefined ? this.props.route.params.product : null;
 
 
         this.state = {
@@ -84,39 +91,43 @@ class NewProductScreen extends React.Component<IProps, IState> {
             sub_3_image_uri: undefined,
 
             //Product informations
-            product_name: "Product Name",
-            product_price: 0,
-            product_reduction: 0,
-            product_description: "Lorem ipsum",
+            product_name: this.shopProduct?.getName(),
+            product_price: this.shopProduct?.getPrice(),
+            product_reduction: this.shopProduct?.getReduction(),
+            product_description: this.shopProduct?.getDescription(),
 
 
-            product_details: ["Color blue"],
-            product_shipping_way: ["Cash on delivery"],
+            product_details: this.shopProduct?.getDetails(),
+            product_shipping_way: this.shopProduct?.getShippings(),
 
             openEditor: false,
-            showSuccessDialog: false
+            showSuccessDialog: false,
+            selectedShop: this.shopProduct?.getShopId()
         };
 
 
 
-        this.productName = "";
-        this.productPrice = 0;
-        this.productReduction = 0;
-        this.productDescription = "";
+        this.productName = this.shopProduct?.getName();
+        this.productPrice = this.shopProduct?.getPrice();
+        this.productReduction = this.shopProduct?.getReduction();
+        this.productDescription = this.shopProduct?.getDescription();
+        this.shopIdBackuped = this.shopProduct?.getShopId();
         this.newProductDetailText = "";
         this.newProductShippingDetailText = "";
 
-        this.shopProduct = new ShopProductEntity("", 0, 0, "");
-
-        this.createShopProductViewModel = {
+        this.updateShopProductViewModel = {
             setShopProductValue: (shopProduct: ShopProductEntity | null) => {
                 console.log("\n\n\nCreated shop product");
                 console.log(shopProduct);
 
                 if (shopProduct != null) {
                     let action: UserShopsProductsActionType = {
-                        type: ADD_USER_SHOP_PRODUCT,
-                        payload: shopProduct
+                        type: UPDATE_USER_SHOP_PRODUCT,
+                        payload: {
+                            product: shopProduct, 
+                            lastShopId: this.shopIdBackuped,
+                            lastId: this.shopProduct.getId()
+                        }
                     }
 
                     if (this.props.dispatch != null) {
@@ -126,6 +137,8 @@ class NewProductScreen extends React.Component<IProps, IState> {
                     //Close the editor
                     this._setEditorVisibility(false);
                     this.setState({ showSuccessDialog: true });
+                }else {
+                    //TODO handle error
                 }
             }
         }
@@ -139,11 +152,14 @@ class NewProductScreen extends React.Component<IProps, IState> {
             <Dialog.Container visible={this.state.showSuccessDialog}>
                 <Dialog.Title>{this.state.product_name}</Dialog.Title>
                 <Dialog.Description>
-                    Product saved....
+                    Product Updated....
                 </Dialog.Description>
                 <Dialog.Button label="Continue" onPress={
                     () => {
                         this.setState({ showSuccessDialog: false });
+                        if(this.props.navigation != undefined){
+                            this.props.navigation.goBack();
+                        }
                     }} />
             </Dialog.Container>
         );
@@ -192,7 +208,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
      * @returns 
      */
     private _renderDescriptionRows = () => {
-        return this.state.product_shipping_way.map(
+        return this.state.product_shipping_way?.map(
             (data, index) => {
                 return (
                     <View key={"ship" + index} style={{ display: 'flex', flexDirection: 'row', marginTop: 9 }}>
@@ -209,7 +225,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
     }
 
     private _renderProductDetailRows = () => {
-        return this.state.product_details.map(
+        return this.state.product_details?.map(
             (data, index) => {
                 return (
                     <View key={"det" + index} style={{ display: 'flex', flexDirection: 'row', marginTop: 9 }}>
@@ -226,46 +242,50 @@ class NewProductScreen extends React.Component<IProps, IState> {
     }
 
 
-    private _toggleDrawerNavigation = () => {
-        console.log(this.props);
-        if (this.props.navigation != undefined)
-            this.props.navigation.toggleDrawer();
-    }
+
 
 
     private _publishProduct = () => {
         console.log("\n\n\nPushing producct....");
         this._setEditorVisibility(false);
-        this.shopProduct.setName(this.state.product_name);
-        this.shopProduct.setName(this.productName);
-        this.shopProduct.setDescription(this.state.product_description);
-        this.shopProduct.setDescription(this.productDescription);
-        this.shopProduct.setPrice(this.state.product_price);
-        this.shopProduct.setPrice(this.productPrice);
-        this.shopProduct.setReduction(this.state.product_reduction);
+        if (this.shopProduct != undefined) {
+            this.shopProduct.setName(this.productName);
+            this.shopProduct.setDescription(this.productDescription);
+            this.shopProduct.setPrice(this.productPrice);
+            this.shopProduct.setReduction(this.productReduction);
 
-        this.shopProduct.setDetails(this.state.product_details);
-        this.shopProduct.setShippings(this.state.product_shipping_way);
+            this.shopProduct.setDetails(this.state.product_details);
+            this.shopProduct.setShippings(this.state.product_shipping_way);
 
-        this.shopProduct.setMainImage(this.state.main_image_filename);
-        this.shopProduct.setSubOneImage(this.state.sub_1_image_filename);
-        this.shopProduct.setSubTwoImage(this.state.sub_2_image_filename);
-        this.shopProduct.setSubThreeImage(this.state.sub_3_image_filename);
-        console.log(this.shopProduct);
+            this.shopProduct.setMainImage(this.state.main_image_filename);
+            this.shopProduct.setSubOneImage(this.state.sub_1_image_filename);
+            this.shopProduct.setSubTwoImage(this.state.sub_2_image_filename);
+            this.shopProduct.setSubThreeImage(this.state.sub_3_image_filename);
+            console.log(this.shopProduct);
 
-        //Validate condition
-        console.log("Shops list ", this.props.shops )
-        if (this.props.context != undefined) {
-            this.props.context.appContainer.controllerFactory
-                .getShopProductController()
-                .createShopProduct(
-                    {
-                        product: this.shopProduct,
-                        shop: this.props.shops.filter((s) => s.getId() === this.shopProduct.getShopId())[0]
-                    },
-                    new NewUserShopProductCreatePresenter(this.createShopProductViewModel)
-                )
+            //Validate condition
+            console.log("Shops list ", this.props.shops)
+            if (this.props.context != undefined) {
+                if (this.shopProduct != null) {
+                    this.props.context.appContainer.controllerFactory
+                        .getShopProductController()
+                        .updateShopProduct(
+                            {
+                                product: this.shopProduct,
+                                shop: this.props.shops.filter((s) => s.getId() === this.shopProduct?.getShopId())[0],
+                                lastShopId: this.shopIdBackuped
+                            },
+                            new UpdateShopProductPresenter(this.updateShopProductViewModel)
+                        )
+                }
+            }
         }
+    }
+
+    private _goBackNavigation = () => {
+        console.log(this.props);
+        if (this.props.navigation != undefined)
+            this.props.navigation.goBack();
     }
 
     render() {
@@ -273,7 +293,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
             <View style={styles.container}>
                 {this._renderDialog()}
 
-                <MenuWithTitleTopBarComponent toggler={this._toggleDrawerNavigation} title={"New Product"} />
+                <BackWithTitleTopBarComponent backCallback={this._goBackNavigation} title={"Shop Product Update"} />
 
                 <ScrollView
                     showsVerticalScrollIndicator={false}
@@ -291,8 +311,8 @@ class NewProductScreen extends React.Component<IProps, IState> {
                             </View>
                             <View style={styles.user_informations_container}>
                                 <View style={styles.user_data_container}>
-                                    <Text style={styles.username}>Xampy</Text>
-                                    <Text style={styles.user_profil}>@see more</Text>
+                                    <Text style={styles.username}>ShopName</Text>
+                                    <Text style={styles.user_profil}>1m - 3min</Text>
                                 </View>
                                 <View style={{ marginTop: 10 }}>
                                     <Octicons name={"comment-discussion"} size={30} />
@@ -310,7 +330,12 @@ class NewProductScreen extends React.Component<IProps, IState> {
                                     <Text style={{ color: 'gray', fontSize: 12 }}>Shop: DonChen Chi</Text>
                                 </View>
                                 <View style={styles.product_price_container}>
-                                    <Text style={styles.product_price_old}>{this.state.product_reduction > 0 ? this.state.product_reduction + '$' : ""}</Text>
+                                    <Text style={styles.product_price_old}>{
+                                        (this.state.product_reduction != undefined &&
+                                            this.state.product_reduction > 0) ? this.state.product_reduction + '$'
+                                            : ""
+                                    }
+                                    </Text>
                                     <Text style={styles.product_price}>{this.state.product_price} $</Text>
                                 </View>
                             </View>
@@ -390,7 +415,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
 
 
     private _renderEditorProductsDetail = () => {
-        return this.state.product_details.map(
+        return this.state.product_details?.map(
             (item, index) => {
                 return (
                     <View key={"product_detail_" + index} style={{ marginTop: 10 }}>
@@ -398,12 +423,14 @@ class NewProductScreen extends React.Component<IProps, IState> {
                             <Text key={"product_detail" + index} >{item}</Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    const details = Array.from(this.state.product_details);
-                                    this.setState({
-                                        product_details: details.filter(
-                                            (value) => item != value
-                                        )
-                                    });
+                                    if (this.state.product_details != undefined) {
+                                        const details = Array.from(this.state.product_details);
+                                        this.setState({
+                                            product_details: details.filter(
+                                                (value) => item != value
+                                            )
+                                        });
+                                    }
                                 }}>
                                 <AntDesign
                                     name={"closecircle"}
@@ -419,7 +446,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
 
 
     private _renderEditorProductsShippingDetail = () => {
-        return this.state.product_shipping_way.map(
+        return this.state.product_shipping_way?.map(
             (item, index) => {
                 return (
                     <View key={"product_shipping_" + index} style={{ marginTop: 10 }}>
@@ -427,12 +454,14 @@ class NewProductScreen extends React.Component<IProps, IState> {
                             <Text key={"product_shipping" + index} >{item}</Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    const details = Array.from(this.state.product_shipping_way);
-                                    this.setState({
-                                        product_shipping_way: details.filter(
-                                            (value) => item != value
-                                        )
-                                    });
+                                    if (this.state.product_shipping_way != undefined) {
+                                        const shippings = Array.from(this.state.product_shipping_way);
+                                        this.setState({
+                                            product_shipping_way: shippings.filter(
+                                                (value) => item != value
+                                            )
+                                        });
+                                    }
                                 }}>
                                 <AntDesign
                                     name={"closecircle"}
@@ -503,11 +532,13 @@ class NewProductScreen extends React.Component<IProps, IState> {
 
                             <View style={styles.editor_section_container}>
                                 <Picker
+                                selectedValue={this.state.selectedShop}
                                     onValueChange={(itemValue: string) => {
                                         console.log(itemValue);
-                                        this.shopProduct.setShopId(itemValue);
+                                        this.shopProduct?.setShopId(itemValue);
+                                        this.setState({selectedShop: itemValue});
                                     }}>
-                                    <Picker.Item key={"default_shop_iii"} label={"choose..."} value={"default"} />
+                                    <Picker.Item key={"default_shop_iii"} label={"choisissez..."} value={"default"} />
                                     {
                                         this.props.shops.map(
                                             (shop) => <Picker.Item key={shop.getId()} label={shop.getName()} value={shop.getId()} />
@@ -643,7 +674,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
                                     <TouchableOpacity
                                         onPress={() => {
 
-                                            if (this.newProductDetailText.length > 1) {
+                                            if (this.state.product_details != undefined && this.newProductDetailText.length > 1) {
                                                 const details = Array.from(this.state.product_details);
                                                 this.setState({
                                                     product_details: [...details, this.newProductDetailText]
@@ -678,7 +709,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
                                     <TouchableOpacity
                                         onPress={() => {
 
-                                            if (this.newProductShippingDetailText.length > 1) {
+                                            if (this.state.product_shipping_way != undefined && this.newProductShippingDetailText.length > 1) {
                                                 const details = Array.from(this.state.product_shipping_way);
                                                 this.setState({
                                                     product_shipping_way: [...details, this.newProductShippingDetailText]
@@ -969,4 +1000,4 @@ const mapDispatchToProps = (dispatch: any) => {
     }
 }
 
-export default connect(mapsStateToProps, mapDispatchToProps)(NewProductScreen);
+export default connect(mapsStateToProps, mapDispatchToProps)(UpdateShopProductScreen);

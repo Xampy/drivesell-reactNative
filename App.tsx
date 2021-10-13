@@ -32,7 +32,7 @@ const App = (props: any) => {
     if (__DEV__) {
         firestore().useEmulator('localhost', 8080);
         firestore().settings({
-            cacheSizeBytes: 25 * 1000000
+            cacheSizeBytes: 50 * 1000000
         })
     }
 

@@ -13,8 +13,9 @@ import NewProductScreen from "../screens/new-product.screen";
 import SearchScreen from "../screens/home/search/search.screen";
 import NewShopScreen from "../screens/new-shop.screen";
 import AppContext from "../../app.context";
-import ShopItemsListScreen from "../screens/shop-items-list.screen";
+import ShopItemsListScreen from "../screens/product/shop-items-list.screen";
 import MyShopsStackNavigator from "./my-shops.navigation";
+import MyShopsProductsProductsStackNavigator from "./products.navigation";
 
 
 const MainDrawer = createDrawerNavigator();
@@ -112,7 +113,7 @@ const MainDrawerNavigator = () => {
                 </MainDrawer.Screen>
                 <MainDrawer.Screen
                     name="My Products"
-                    component={ShopItemsListScreen} />
+                    component={MyShopsProductsProductsStackNavigator} />
                 <MainDrawer.Screen
                     name="My Shops"
                     component={MyShopsStackNavigator} />
