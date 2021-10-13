@@ -39,7 +39,7 @@ export default class FirebaseShopProductApiService implements FirebaseShopProduc
     }
 
     public delete(request: DeleteShopProductFirebaseRequest) {
-        console.log("\n\nIn firebase update shop product");
+        console.log("\n\n\nIn firebase delete shop product");
         console.log(request);
 
         return new Promise<DeleteShopProductFirebaseResponse>(
@@ -67,8 +67,8 @@ export default class FirebaseShopProductApiService implements FirebaseShopProduc
         firestore().collection(path).doc(request.getShop().getId())
             .collection("products").doc(request.getProduct().getId()).delete()
             .then(
-                (value) => {
-                    console.log("\n Shop Product updated");
+                () => {
+                    console.log("\n\n Shop Product deleted");
 
                     response = new DeleteShopProductFirebaseResponse(null);
                     resolve(response);
@@ -113,7 +113,7 @@ export default class FirebaseShopProductApiService implements FirebaseShopProduc
                         shopId: request.getProduct().getShopId()
                     }
                 ).then(
-                    (value) => {
+                    () => {
                         console.log("\n Shop Product updated");
 
                         response = new UpdateShopProductFirebaseResponse(request.getProduct(), null);

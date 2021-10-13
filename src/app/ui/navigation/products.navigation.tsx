@@ -22,14 +22,15 @@ const MyShopsProductsProductsStackNavigator = () => {
 
 
             <MyShopsProductsStack.Screen
-                name="Shops-Products-List-Screen">
-                    {(props) => {
+                name="Shops-Products-List-Screen" 
+                component={ShopItemsListScreen} 
+                initialParams={{context: context}}></MyShopsProductsStack.Screen>
+                    {/*{(props) => {
                         const p = { context: context, ...props }
                         return <ShopItemsListScreen {...p} />
-                    }}
-            </MyShopsProductsStack.Screen>
+                    }}*/}
             <MyShopsProductsStack.Screen
-                name="Shop-Product-Update-Screen">
+                name="Shop-Product-Update-Screen" >
                     {(props) => {
                         const p = { context: context, ...props }
                         return <UpdateShopProductScreen {...p} />

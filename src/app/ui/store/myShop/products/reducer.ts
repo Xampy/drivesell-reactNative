@@ -33,11 +33,16 @@ export default function userShopsProductsReducer(
             };
         case DELETE_USER_SHOP_PRODUCT:
             console.log("action " + DELETE_USER_SHOP_PRODUCT);
+            console.log("\n\nBefore delete Redux " + state.shopsProducts.length);
+
+            let r = state.shopsProducts.filter(
+                (p) => p.getId() != action.payload.getId()
+            )
+
+            console.log("After delete Redux " + r.length);
 
             return {
-                shopsProducts: state.shopsProducts.filter(
-                    (p) => p.getId() != action.payload.getId()
-                )
+                shopsProducts: [...r]
             };
         default:
             return state;

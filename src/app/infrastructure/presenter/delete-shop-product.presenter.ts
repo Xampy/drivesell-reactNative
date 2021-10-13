@@ -14,6 +14,7 @@ export default class DeleteShopProductPresenter implements DeleteShopProductPres
         this.viewModel = viewModel;
     }
     public present(response: DeleteShopProductUseCaseResponse){
+        console.log("[In delete use case presenter ] " + response.getError());
         if(response.getError() == null){
             if(this.viewModel != null)
                 this.viewModel.setErrorValue(response.getError());

@@ -56,10 +56,12 @@ class DeleteShopProductUseCase {
         //Store the data to local storage
         if (result.getError() == null) {
             let shopsProducts = storageFactory.getLocalStorage().storage.shopsProducts;
-            shopsProducts.filter( (sp) => { sp.id != useCaseRequest.getProduct().getId();})
+            shopsProducts = shopsProducts.filter( (sp) => { sp.id != useCaseRequest.getProduct().getId();})
 
+            console.log("{WRITE STORAGE START]");
             storageFactory.getLocalStorage().storeObject(STORAGE_SHOPS_PRODUCTS_KEY, shopsProducts);
             console.log(storageFactory.getLocalStorage().getObject(STORAGE_SHOPS_PRODUCTS_KEY));
+            console.log("{WRITE STORAGE END]");
         }
 
         presenter.present(response[0]);

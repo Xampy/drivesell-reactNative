@@ -14,15 +14,15 @@ import { DELETE_USER_SHOP_PRODUCT, UserShopsProductsActionType } from "../../sto
 const product_image = require("../../../../assets/img/product/product_main.jpg");
 
 interface IProps {
-    context: AppContextInterface,
+    context?: AppContextInterface,
     navigation: any,
+    route: any,
     dispatch: (action: any) => void,
     shops: ShopEntity[],
     shopsProducts: ShopProductEntity[]
 }
 
 interface IState {
-    filteredhopsProducts: ShopProductEntity[]
     shopSelected: string
 }
 
@@ -30,7 +30,8 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
 
     private deleteShopProductViewModel: DeleteShopProductViewModel;
     private shopProductToDelete: ShopProductEntity | null;
-    private hasDeletedProduct: boolean;
+    shopsProducts: ShopProductEntity[];
+    shopsProductsFiltered: ShopProductEntity[];
 
     constructor(props: any) {
         super(props);
@@ -38,29 +39,31 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
         console.log(this.props);
 
         console.log("\n\n", this.props.shops)
-
+        this.shopsProducts = [...this.props.shopsProducts];
+        this.shopsProductsFiltered = [...this.props.shopsProducts];
         //const state = useSelector(state => state.)
         this.state = {
-            filteredhopsProducts: this.props.shopsProducts,
             shopSelected: 'all'
         };
 
         this.shopProductToDelete = null;
-        this.hasDeletedProduct = false;
 
         this.deleteShopProductViewModel = {
             setErrorValue: (error) => {
+                console.log("\n\nIn View Model");
+                console.log(error);
                 if (error == null) {
                     //Success delete
-                    this.hasDeletedProduct = true;
-
+                    console.log("Create action start");
                     if (this.shopProductToDelete != null) {
+                        console.log("Create action");
                         let action: UserShopsProductsActionType = {
                             type: DELETE_USER_SHOP_PRODUCT,
                             payload: this.shopProductToDelete
                         }
 
                         if (this.props.dispatch != null) {
+                            console.log("Dispatch Called");
                             this.props.dispatch(action);
                         }
                     } else {
@@ -68,37 +71,48 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
                     }
 
 
+                } else {
+                    console.log("[Delete View Model] ", error)
                 }
             }
         }
     }
 
-    componentDidMount() {
-        console.log(this.state);
+    componentDidUpdate() {
+        //this.shopsProducts = [...this.props.shopsProducts];
+        //this.shopsProductsFiltered = [...this.shopsProducts];
+
+        console.log("component did update");
+        console.log(this.shopsProductsFiltered, this.shopsProducts);
     }
 
-    componentDidUpdate() {
-        const s = this.state.shopSelected;
-        if (this.hasDeletedProduct == true) {
-            this.hasDeletedProduct = false;
-            this.setState({
-                filteredhopsProducts: this.props.shopsProducts,
-                shopSelected: s
-            });
+    shouldComponentUpdate(nextProps: Readonly<IProps>, nextState: Readonly<IState>, nextContext: any) {
+
+        //[SUGGESTION] run deep on each item to check if the contents are same
+        if (nextProps.shopsProducts.length != this.shopsProducts.length) {
+            this.shopsProducts = [...nextProps.shopsProducts];
+            this.shopsProductsFiltered = [...this.shopsProducts];
         }
+
+
+        console.log("component should update");
+        console.log(this.shopsProductsFiltered, this.shopsProducts);
+        return true;
     }
+
+
 
     private _handleFilterChangle = (itemValue: string) => {
         console.log(itemValue);
 
         if (itemValue == 'all') {
+            this.shopsProductsFiltered = [...this.shopsProducts];
             this.setState({
-                filteredhopsProducts: this.props.shopsProducts,
-                shopSelected: 'all'
+                shopSelected: itemValue
             });
         } else {
+            this.shopsProductsFiltered = this.shopsProducts.filter(sp => sp.getShopId() == itemValue);
             this.setState({
-                filteredhopsProducts: this.props.shopsProducts.filter(sp => sp.getShopId() == itemValue),
                 shopSelected: itemValue
             });
         }
@@ -117,8 +131,8 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
     }
 
     private _handleDeleteProductClick = (p: ShopProductEntity) => {
-        if (this.props.context != undefined) {
-            this.props.context.appContainer.controllerFactory
+        if (this.props.route.params.context != undefined) {
+            this.props.route.params.context.appContainer.controllerFactory
                 .getShopProductController()
                 .deleteShopProduct(
                     {
@@ -131,15 +145,16 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
     }
 
     private _renderProducts = () => {
-        //this.state.filteredhopsProducts.length > 0
-        if (true) {
-            return this.state.filteredhopsProducts.map(
+        console.log("Products"),
+            console.log(this.shopsProductsFiltered, this.shopsProducts);
+        if (this.shopsProductsFiltered.length > 0) {
+            return this.shopsProductsFiltered.map(
                 (item) => {
 
                     const shop = this.props.shops.find(s => s.getId() == item.getShopId())
 
                     return (
-                        <View key={"" + item.getId()} style={styles.product_container}>
+                        <View key={"product_" + item.getId()} style={styles.product_container}>
                             <View style={styles.product_image_container}>
                                 <Image
                                     source={product_image}
@@ -298,7 +313,9 @@ const styles = StyleSheet.create({
 });
 
 const mapsStateToProps = (state: RootStateType) => {
-    return { ...state.userShopReducer, ...state.userShopsProductsReducer };
+    console.log("\nIn shop products list state..");
+    console.log(state);
+    return { ...state.userShopReducer, ...state.userShopsProductsReducer }
 }
 
 const mapDispatchToProps = (dispatch: any) => {
