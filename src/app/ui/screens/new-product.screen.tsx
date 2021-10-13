@@ -53,7 +53,8 @@ interface IState {
 
 
     openEditor: boolean,
-    showSuccessDialog: boolean
+    showSuccessDialog: boolean,
+    selectedShop: string
 }
 
 class NewProductScreen extends React.Component<IProps, IState> {
@@ -94,7 +95,8 @@ class NewProductScreen extends React.Component<IProps, IState> {
             product_shipping_way: ["Cash on delivery"],
 
             openEditor: false,
-            showSuccessDialog: false
+            showSuccessDialog: false,
+            selectedShop: 'default'
         };
 
 
@@ -503,9 +505,12 @@ class NewProductScreen extends React.Component<IProps, IState> {
 
                             <View style={styles.editor_section_container}>
                                 <Picker
+                                selectedValue={this.state.selectedShop}
                                     onValueChange={(itemValue: string) => {
                                         console.log(itemValue);
                                         this.shopProduct.setShopId(itemValue);
+
+                                        this.setState({selectedShop: itemValue});
                                     }}>
                                     <Picker.Item key={"default_shop_iii"} label={"choose..."} value={"default"} />
                                     {
