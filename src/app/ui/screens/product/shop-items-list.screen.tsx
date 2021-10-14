@@ -67,7 +67,7 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
                             this.props.dispatch(action);
                         }
                     } else {
-                        console.log("Shop to delete is null ? " + this.shopProductToDelete == null);
+                        console.log("Shop to delete is null");
                     }
 
 
@@ -132,6 +132,7 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
 
     private _handleDeleteProductClick = (p: ShopProductEntity) => {
         if (this.props.route.params.context != undefined) {
+            this.shopProductToDelete = p;
             this.props.route.params.context.appContainer.controllerFactory
                 .getShopProductController()
                 .deleteShopProduct(

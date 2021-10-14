@@ -146,6 +146,9 @@ class NewProductScreen extends React.Component<IProps, IState> {
                 <Dialog.Button label="Continue" onPress={
                     () => {
                         this.setState({ showSuccessDialog: false });
+                        if(this.props.navigation != undefined){
+                            this.props.navigation.navigate("My Products");
+                        }
                     }} />
             </Dialog.Container>
         );
