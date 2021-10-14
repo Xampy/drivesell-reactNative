@@ -9,7 +9,7 @@
  */
 
 import { NavigationContainer } from '@react-navigation/native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AppContext, { AppContextInterface } from './src/app/app.context';
@@ -23,6 +23,7 @@ import { createStore } from 'redux';
 import { rootReducer } from './src/app/ui/store';
 import { ADD_USER_SHOP, UserShopActionType } from './src/app/ui/store/myShop/type';
 import ShopEntity from './src/app/domain/entity/shop.entity';
+import SplashScreen from './src/app/ui/screens/splash/splash.screen';
 
 
 
@@ -47,8 +48,9 @@ const App = (props: any) => {
         appContainer: container
     }
     console.log("In App ", contextValue);
-
     const store = createStore(rootReducer);
+
+    const [loaded, setLoaded] = useState<boolean>(false);
 
     /*const dispatch = useDispatch();
 
@@ -74,6 +76,24 @@ const App = (props: any) => {
 
     }, [])*/
 
+    const handleDataLoaded = () => {
+        setLoaded(true);
+    }
+    
+    const renderScreens = () => {
+        if(loaded){
+            return (
+                <NavigationContainer>
+                    <MainDrawerNavigator></MainDrawerNavigator>
+                </NavigationContainer>
+            );
+        }
+
+        return <SplashScreen onLoad={handleDataLoaded}/>
+    }
+
+    
+
     return (
         /*<SafeAreaView style={backgroundStyle}>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -82,9 +102,7 @@ const App = (props: any) => {
 
         <Provider store={store}>
             <AppContext.Provider value={contextValue}>
-                <NavigationContainer>
-                    <MainDrawerNavigator></MainDrawerNavigator>
-                </NavigationContainer>
+                {renderScreens()}
             </AppContext.Provider>
         </Provider>
     );
