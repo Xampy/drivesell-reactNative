@@ -2,5 +2,6 @@ import GetUserShopsFirebaseRequest from "../../../../../../dto/request/api/fireb
 import GetUserShopsFirebaseResponse from "../../../../../../dto/response/api/firebase/shop/get-user-shops-firebase.response";
 
 export interface FirebaseUserApiServiceInterface {
+    createShop: (request: {userId: string, shopId: string}) => Promise<boolean>,
     getShops: (request: GetUserShopsFirebaseRequest) => Promise<GetUserShopsFirebaseResponse>
 }

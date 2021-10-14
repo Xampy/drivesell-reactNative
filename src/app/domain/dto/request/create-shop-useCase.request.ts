@@ -7,11 +7,15 @@ export default class CreateShopUseCaseRequest {
     private latitude: string;
     private longitude: string;
 
+    private userId: string;
+
     constructor(name: string, description: string, city: string,
         provinceOrRegion: string,
         country: string,
         latitude: string,
-        longitude: string) {
+        longitude: string,
+        
+        userId: string) {
 
         this.name = name;
         this.description = description;
@@ -21,9 +25,12 @@ export default class CreateShopUseCaseRequest {
 
         this.latitude = latitude;
         this.longitude = longitude;
+
+        this.userId = userId;
     }
 
     public getName(){return this.name;}
+    public getUserId(){return this.userId;}
     public getDescription(){return this.description;}
     public getCity(){return this.city;}
     public getProvinceOrRegion(){return this.provinceOrRegion;}

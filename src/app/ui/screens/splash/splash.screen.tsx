@@ -18,21 +18,29 @@ class SplashScreen extends React.Component<IProps, IState> {
 
     private getUserShopsViewModel: GetUserShopsViewModel;
 
-    constructor(props: any){
+    constructor(props: any) {
         super(props);
 
         this.getUserShopsViewModel = {
             setShopsValue: (shops) => {
                 console.log(shops);
+
+                setTimeout(() => {
+                    console.log("Content loaded");
+
+                    if (this.props.onLoad != undefined) {
+                        this.props.onLoad();
+                    }
+                }, 2000);
             }
         }
     }
 
-    componentDidMount(){
+    componentDidMount() {
         console.log(this.state);
         console.log(this.context);
 
-        if(this.context != undefined){
+        if (this.context != undefined) {
             (this.context as AppContextInterface).appContainer
                 .controllerFactory.getUserController()
                 .getShops(
@@ -46,16 +54,10 @@ class SplashScreen extends React.Component<IProps, IState> {
                 )
         }
 
-        /*setTimeout(() => {
-            console.log("Time gone");
 
-            if(this.props.onLoad != undefined){
-                this.props.onLoad();
-            }
-        }, 2000);*/
     }
 
-    render(){
+    render() {
         return (
             <View style={styles.container}>
                 <Text>SPLASH SCREEN</Text>

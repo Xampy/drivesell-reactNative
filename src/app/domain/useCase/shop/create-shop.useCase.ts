@@ -34,9 +34,22 @@ class CreateShopUseCase {
             .create(request)
             .then(
                 (result) => {
-                    this.handleFirebaseCreateSuccess(
-                        result, useCaseRequest, response,
-                        storageFactory, presenter);
+
+                    const s = result.getShop();
+                    if (s != null) {
+                        apiFactory.getFirebase().getFirebaseApiServiceFactory()
+                            .getUserService().createShop(
+                                {
+                                    userId: useCaseRequest.getUserId(),
+                                    shopId: s.getId()
+                                }
+                            )
+                        this.handleFirebaseCreateSuccess(
+                            result, apiFactory,
+                            useCaseRequest, response,
+                            storageFactory, presenter);
+                    }
+
                 }
             ).catch(
                 (err) => {
@@ -47,6 +60,7 @@ class CreateShopUseCase {
     }
 
     private handleFirebaseCreateSuccess(result: CreateShopFirebaseResponse,
+        apiFactory: ApiFactoryInterface,
         useCaseRequest: CreateShopUseCaseRequest, response: CreateShopUseCaseResponse[],
         storageFactory: StorageFactoryInterface, presenter: NewUserShopCreatePresenterInterface) {
 

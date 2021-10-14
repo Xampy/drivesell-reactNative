@@ -11,7 +11,7 @@ export default class  ControllerFactory {
     private userController: UserController;
 
     constructor(storageFactory: StorageFactory, apiFactory: ApiFactoryInterface,  loginContainer: LoginContainer){
-        this.shopController = new ShopController(storageFactory, apiFactory);
+        this.shopController = new ShopController(storageFactory, apiFactory, loginContainer);
         this.shopProductController = new ShopProductController(storageFactory, apiFactory);
         this.userController = new UserController(storageFactory, apiFactory, loginContainer)
     }

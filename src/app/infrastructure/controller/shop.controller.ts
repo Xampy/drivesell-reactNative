@@ -4,6 +4,7 @@ import ShopEntity from "../../domain/entity/shop.entity";
 import { ApiFactoryInterface } from "../../domain/port/primary/api/api-factory.interface";
 import CreateShopUseCase from "../../domain/useCase/shop/create-shop.useCase";
 import UpdateShopUseCase from "../../domain/useCase/shop/update-shop.useCase";
+import LoginContainer from "../../share/container/login.container";
 import StorageFactory from "../adapter/secondary/storage/storage-factory.interface";
 import NewUserShopCreatePresenter from "../presenter/new-user-shop-create.presenter";
 import UpdateUserShopPresenter from "../presenter/update-user-shop.presenter";
@@ -30,10 +31,12 @@ interface UpdateUserShopRequestInterface {
 export default class ShopController {
     private apiFactory: ApiFactoryInterface;
     private storageFactory: StorageFactory;
+    private loginContainer: LoginContainer;
 
-    constructor(storageFactory: StorageFactory, apiFactory: ApiFactoryInterface) {
+    constructor(storageFactory: StorageFactory, apiFactory: ApiFactoryInterface, loginContainer: LoginContainer) {
         this.apiFactory = apiFactory;
         this.storageFactory = storageFactory;
+        this.loginContainer = loginContainer;
     }
 
     public createShop(input: CreateUserShopRequestInterface, presenter: NewUserShopCreatePresenter) {
@@ -42,7 +45,9 @@ export default class ShopController {
             input.shopName, input.shopDescription,
             input.shopCity, input.shopProvinceOrRegion, input.shopCountry,
             input.latitude,
-            input.longitude);
+            input.longitude,
+            this.loginContainer.userId
+            );
         
         console.log("\n\nCreate use case request");
         console.log(input);

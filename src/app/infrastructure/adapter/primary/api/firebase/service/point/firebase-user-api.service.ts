@@ -4,11 +4,13 @@ import { FirebaseUserApiServiceInterface } from "../../../../../../../domain/por
 
 import '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
+import firebase from '@react-native-firebase/app';
 
-export const DEFAULT_USER_FIREBASE_DOC_ID = "gfOVAAjeDDYQ6nwTsFnh";
+export const DEFAULT_USER_FIREBASE_DOC_ID = "fFf5RwYULAK7XThNTO6Z";
 
 
 export default class FirebaseUserApiService implements FirebaseUserApiServiceInterface {
+
 
     public getShops(request: GetUserShopsFirebaseRequest) {
         return new Promise<GetUserShopsFirebaseResponse>(
@@ -18,12 +20,43 @@ export default class FirebaseUserApiService implements FirebaseUserApiServiceInt
         );
     }
 
+    public createShop(request: { userId: string; shopId: string; }) {
+        return new Promise<boolean>(
+            (resolve, reject) => {
+                this.handleCreateShop(
+                    request,
+                    resolve, reject)
+            }
+        );
+    }
+
+    private handleCreateShop(request: { userId: string; shopId: string; },
+        resolve: Function, reject: Function) {
+            const path: string = "users";
+
+            console.log("User " + request.userId);
+            firestore().collection(path).doc(request.userId).update(
+                {
+                    shops: firebase.firestore.FieldValue.arrayUnion(request.shopId)
+                }
+            ).then(
+                () => {
+                    resolve(true);
+                }
+            ).catch(
+                (error) => {
+                    reject(error);
+                }
+            )
+    }
+
+
     private handleGetShops(request: GetUserShopsFirebaseRequest,
         resolve: Function, reject: Function) {
         let response: GetUserShopsFirebaseResponse;
 
         const path: string = "users";
-        
+
         console.log("User " + request.getUserDocId());
         firestore().collection(path).doc(request.getUserDocId())
             .get().then(
@@ -31,10 +64,10 @@ export default class FirebaseUserApiService implements FirebaseUserApiServiceInt
                     const data = doc.data();
                     console.log(doc);
 
-                    if(!doc.exists){
+                    if (!doc.exists) {
                         console.log("Doc not exists...");
                     }
-                    if (data != undefined){
+                    if (data != undefined) {
                         response = new GetUserShopsFirebaseResponse(
                             data.shops, null
                         )
