@@ -9,11 +9,13 @@ import UpdateShopFirebaseRequest from "../../../../../../../domain/dto/request/a
 import updateShopFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/update-shop-firebase.response";
 import UpdateShopFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/update-shop-firebase.response";
 import GetShopFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/shop/get-shop-firebase.request";
-import GetUserShopsFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/shop/get-user-shops-firebase.request";
 import GetShopFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/get-shop-firebase.response";
-import GetUserShopsFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/get-user-shops-firebase.response";
+import GetShopProductsFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/shop/get-shop-products-firebase.request";
+import GetShopProductsFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/get-shopProducts-firebase.response";
+import ShopProductEntity from "../../../../../../../domain/entity/product.entity";
 
 export default class FirebaseShopApiService implements FirebaseShopApiServiceInterface {
+
 
 
     public create(request: CreateShopFirebaseRequest) {
@@ -49,8 +51,63 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
         );
     }
 
+    public getProducts(request: GetShopProductsFirebaseRequest) {
+        return new Promise<GetShopProductsFirebaseResponse>(
+            (resolve, reject) => {
+                this.handleGetProducts(request, resolve, reject);
+            }
+        );
+    }
 
-    
+    private handleGetProducts(request: GetShopProductsFirebaseRequest,
+        resolve: Function, reject: Function) {
+        let response: GetShopProductsFirebaseResponse;
+
+        const path: string = request.getShop().getCountry() + "_" +
+            request.getShop().getProvinceOrRegion() + "_" +
+            request.getShop().getCity() + "_shops";
+
+
+        firestore().collection(path).doc(request.getShop().getId())
+            .collection("products").get()
+            .then(
+                (query) => {
+                    console.log(query);
+
+                    const res = query.docs.map(
+                        (doc) => {
+                            const data = doc.data()
+                            const p = new ShopProductEntity(
+                                data.name, data.price, data.reduction,
+                                data.description
+                            );
+
+                            p.setId(doc.id);
+                            p.setDetails(data.details);
+                            p.setShippings(data.shipping);
+                            p.setMainImage(data.MainImage);
+                            p.setSubOneImage(data.subOneImage);
+                            p.setSubTwoImage(data.subTwoImage);
+                            p.setSubThreeImage(data.subThreeImage);
+
+                            p.setShopId(data.shopId);
+
+                            return p;
+                        }
+                    );
+
+                    response = new GetShopProductsFirebaseResponse(res, null);
+                    resolve(response);
+                }
+            ).catch(
+                (error) => {
+                    console.log(error);
+                    reject(error);
+                }
+            );
+    }
+
+
     private handleFindByDoc(request: GetShopFirebaseRequest,
         resolve: Function, reject: Function) {
         let response: GetShopFirebaseResponse;
@@ -63,14 +120,27 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
         firestore().collection(path).doc(request.getShopDocId())
             .get().then(
                 (doc) => {
+                    console.log(doc);
                     const data = doc.data();
-                    if (data != undefined){
-                        const d = data as ShopEntity;
+                    if (data != undefined) {
+                        const d = new ShopEntity(
+                            data.name, data.description,
+                            data.city, data.provinceOrRegion, data.country
+                        );
+
+                        d.setId(doc.id);
+                        d.setLongitude(data.longitude);
+                        d.setLatitude(data.latitude);
+
+                        console.log("In firebase shop service get shop by id");
+                        console.log(d);
+
+
                         response = new GetShopFirebaseResponse(d, null);
 
                         resolve(response);
-                    }                        
-                    else resolve( new GetShopFirebaseResponse(null, null));
+                    }
+                    else resolve(new GetShopFirebaseResponse(null, null));
                 }
             ).catch(
                 (error) => {

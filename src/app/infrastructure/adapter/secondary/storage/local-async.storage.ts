@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AsyncStorageInterface from "../../../../domain/port/secondary/storage/async-storage.interface";
 import { StorageShop, StorageShopProduct, STORAGE_SHOPS_KEY, STORAGE_SHOPS_PRODUCTS_KEY } from "../../../../domain/port/secondary/storage/storage.interface";
 
+export const STORAGE_LATEST_LOCATION_KEY = "STORAGE_LATEST_LOCATION_KEY";
 
 export default class LocalAsyncStorageInterface implements AsyncStorageInterface {
 

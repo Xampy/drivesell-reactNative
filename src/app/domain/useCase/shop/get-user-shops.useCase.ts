@@ -1,5 +1,6 @@
 import CreateShopFirebaseRequest from "../../dto/request/api/firebase/shop/create-shop-firebase.request";
 import GetShopFirebaseRequest from "../../dto/request/api/firebase/shop/get-shop-firebase.request";
+import GetShopProductsFirebaseRequest from "../../dto/request/api/firebase/shop/get-shop-products-firebase.request";
 import GetUserShopsFirebaseRequest from "../../dto/request/api/firebase/shop/get-user-shops-firebase.request";
 import CreateShopUseCaseRequest from "../../dto/request/create-shop-useCase.request";
 import GetUserShopsUseCaseRequest from "../../dto/request/get-user-shops-useCase.request";
@@ -7,6 +8,7 @@ import CreateShopFirebaseResponse from "../../dto/response/api/firebase/shop/cre
 import GetUserShopsFirebaseResponse from "../../dto/response/api/firebase/shop/get-user-shops-firebase.response";
 import CreateShopUseCaseResponse from "../../dto/response/create-shop-useCase.response";
 import GetUserShopsUseCaseResponse from "../../dto/response/get-user-shops-useCase.response";
+import ShopProductEntity from "../../entity/product.entity";
 import ShopEntity from "../../entity/shop.entity";
 import { ApiFactoryInterface } from "../../port/primary/api/api-factory.interface";
 import StorageFactoryInterface from "../../port/secondary/storage/storage-factory.interface";
@@ -54,6 +56,7 @@ class GetUserShopsUseCase {
         storageFactory: StorageFactoryInterface, presenter: GetUserShopsPresenterInterface) {
 
         const userShops: ShopEntity[] = [];
+        const userShopsProducts: ShopProductEntity[] = [];
         //For each dhop document id, we fecth the object
         if (result.getUserShops() != null) {
             const shopsId = result.getUserShops();
@@ -86,6 +89,28 @@ class GetUserShopsUseCase {
 
                     } catch (error) {
                         response[0] = new GetUserShopsUseCaseResponse(
+                            null, null,
+                            new Error("An error occured")
+                        );
+                        presenter.present(response[0]);
+                        break;
+                    }
+                };
+
+
+                for (const shop of userShops) {
+                    try {
+                        const res = await apiFactory.getFirebase().getFirebaseApiServiceFactory()
+                            .getShopService()
+                            .getProducts(new GetShopProductsFirebaseRequest(shop));
+
+                        const products = res.getProducts();
+                        if(products != null){
+                            userShopsProducts.push(...products);
+                        }
+                    } catch (error) {
+                        response[0] = new GetUserShopsUseCaseResponse(
+                            null,
                             null,
                             new Error("An error occured")
                         );
@@ -96,12 +121,14 @@ class GetUserShopsUseCase {
 
                 response[0] = new GetUserShopsUseCaseResponse(
                     userShops,
+                    userShopsProducts,
                     null
                 );
                 presenter.present(response[0]);
             }
         } else {
             response[0] = new GetUserShopsUseCaseResponse(
+                null,
                 null,
                 new Error("An error occured")
             );
@@ -118,7 +145,7 @@ class GetUserShopsUseCase {
         presenter: GetUserShopsPresenterInterface) {
 
         response[0] = new GetUserShopsUseCaseResponse(
-            null,
+            null, null,
             new Error("An error occured")
         );
         presenter.present(response[0]);

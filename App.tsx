@@ -9,21 +9,18 @@
  */
 
 import { NavigationContainer } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, {  } from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AppContext, { AppContextInterface } from './src/app/app.context';
 import AppContainer from './src/app/share/container/app.container';
-import MainDrawerNavigator from './src/app/ui/navigation/main.navigation';
 
 import '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
-import { Provider, useDispatch } from 'react-redux';
+import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import { rootReducer } from './src/app/ui/store';
-import { ADD_USER_SHOP, UserShopActionType } from './src/app/ui/store/myShop/type';
-import ShopEntity from './src/app/domain/entity/shop.entity';
-import SplashScreen from './src/app/ui/screens/splash/splash.screen';
+import AppStackNavigator from './src/app/ui/navigation/app.navigation';
 
 
 
@@ -49,49 +46,6 @@ const App = (props: any) => {
     }
     console.log("In App ", contextValue);
     const store = createStore(rootReducer);
-
-    const [loaded, setLoaded] = useState<boolean>(false);
-
-    /*const dispatch = useDispatch();
-
-    Use it on a SPLASH_SCREEN
-    
-    useEffect(() => {
-        //Dispatch the local shop and products to others component
-        console.log("\n\nComponent did mount")
-        console.log(container);
-        console.log("\n\n");
-        console.log("In App : props \n");
-        console.log(props.dispatch);
-
-        container.storageFactory.getLocalStorage().storage.shops.forEach(
-            (shop) => {
-                let p = shop as unknown as ShopEntity;
-                let action: UserShopActionType = {
-                    type: ADD_USER_SHOP,
-                    payload: p
-                }
-            }
-        )
-
-    }, [])*/
-
-    const handleDataLoaded = () => {
-        setLoaded(true);
-    }
-    
-    const renderScreens = () => {
-        if(loaded){
-            return (
-                <NavigationContainer>
-                    <MainDrawerNavigator></MainDrawerNavigator>
-                </NavigationContainer>
-            );
-        }
-
-        return <SplashScreen onLoad={handleDataLoaded}/>
-    }
-
     
 
     return (
@@ -102,7 +56,9 @@ const App = (props: any) => {
 
         <Provider store={store}>
             <AppContext.Provider value={contextValue}>
-                {renderScreens()}
+            <NavigationContainer>
+                    <AppStackNavigator></AppStackNavigator>
+                </NavigationContainer>
             </AppContext.Provider>
         </Provider>
     );
