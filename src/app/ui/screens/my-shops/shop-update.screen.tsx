@@ -1,6 +1,8 @@
+import CheckBox from '@react-native-community/checkbox';
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
+import Geolocation from 'react-native-geolocation-service';
 import { connect } from 'react-redux';
 import { AppContextInterface } from '../../../app.context';
 import ShopEntity from '../../../domain/entity/shop.entity';
@@ -8,6 +10,7 @@ import UpdateUserShopPresenter, { UpdateShopViewModel } from '../../../infrastru
 import BackWithTitleTopBarComponent from '../../components/core/back-with-title-top-bar.component';
 import MenuWithTitleTopBarComponent from '../../components/core/menu-with-tile-top-bar.component';
 import ShopListItemComponent from '../../components/shop/shop-list-item.component';
+import { requestLocationPermission } from '../../location.tools';
 import { UPDATE_USER_SHOP, UserShopActionType } from '../../store/myShop/type';
 
 interface IProps {
@@ -28,7 +31,8 @@ interface IState {
     image_filename: string,
     image_uri: any,
 
-    openEditor: boolean
+    openEditor: boolean,
+    toggleCheckBox: boolean
 }
 
 class ShopUpdateScreen extends React.Component<IProps, IState> {
@@ -41,6 +45,7 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
     private shopProvinceOrRegion: string;
 
     private updateUserShopViewModel: UpdateShopViewModel;
+    hasLocationPermission: Promise<boolean | null> | null;
 
     constructor(props: any) {
         super(props);
@@ -48,26 +53,8 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
         console.log(this.props.route);
         console.log("\n\nIn shop update screen " + this.props);
         console.log(this.props);
-        //this.shop = 
-        /*this.shopName = "Test";
-        this.shopDescription = "Test Description";
-        this.shopCountry = "Togo";
-        this.shopProvinceOrRegion = "Maritime";
-        this.shopCity = "Lome";
 
-        this.state = {
-            name: this.shopName,
-            description: this.shopDescription,
-            country: this.shopCountry,
-            provinceOrRegion: this.shopProvinceOrRegion,
-            city: this.shopCity,
-            distance: 0,
-            time: 0,
-            image_filename: "filename",
-            image_uri: null,
-
-            openEditor: false
-        }*/
+        this.hasLocationPermission = null;
 
         this.updateUserShopViewModel = {
             setShopValue: (shop) => {
@@ -123,9 +110,14 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
             image_filename: "filename",
             image_uri: null,
 
-            openEditor: false
+            openEditor: false,
+            toggleCheckBox: false
         }
 
+    }
+
+    componentDidMount() {
+        this.hasLocationPermission = requestLocationPermission();
     }
 
 
@@ -185,9 +177,6 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
     }
 
     private _updateShop = () => {
-
-
-
         if (this.props.context != undefined) {
             console.log("\n\n\nUpdate shop...");
 
@@ -200,17 +189,53 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
             this.shop.setName(this.shopName);
             this.shop.setDescription(this.shopDescription);
 
-            this.props.context.appContainer.controllerFactory
-                .getShopController().updateShop(
-                    {
-                        shop: this.shop,
-                        ...latestLocation
-                    },
+            //Sorry for the name
+            if (this.state.toggleCheckBox == true) {
+                Geolocation.getCurrentPosition(
+                    (position) => {
+                        console.log(position);
 
-                    new UpdateUserShopPresenter(this.updateUserShopViewModel)
+                        this.shop.setLatitude(`${position.coords.latitude}`);
+                        this.shop.setLongitude(`${position.coords.longitude}`);
+
+                        this.props.context.appContainer.controllerFactory
+                            .getShopController().updateShop(
+                                {
+                                    shop: this.shop,
+                                    ...latestLocation
+                                },
+
+                                new UpdateUserShopPresenter(this.updateUserShopViewModel)
+                            );
+
+                    },
+                    (error) => {
+                        // See error code charts below.
+                        console.log(error.code, error.message);
+                    },
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
                 );
+            } else {
+                //Don't want to update the postiion
+                this.props.context.appContainer.controllerFactory
+                    .getShopController().updateShop(
+                        {
+                            shop: this.shop,
+                            ...latestLocation
+                        },
+
+                        new UpdateUserShopPresenter(this.updateUserShopViewModel)
+                    );
+            }
+
+
         }
 
+    }
+
+
+    private _handleCheckBoxToggle = (value: boolean) => {
+        this.setState({ toggleCheckBox: value });
     }
 
     private _renderEditor = () => {
@@ -244,8 +269,22 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
                             </View>
                         </View>
 
-
                         <View style={styles.editor_section_container}>
+                            <Text style={styles.editor_section_title}>Shop Position</Text>
+
+                            <View style={styles.editor_image_chooser_container}>
+                                <CheckBox
+                                    disabled={false}
+                                    value={this.state.toggleCheckBox}
+                                    onValueChange={(newValue) => this._handleCheckBoxToggle(newValue)}
+                                />
+                                <Text>Update the shop position</Text>
+
+                            </View>
+                        </View>
+
+
+                        <View style={[styles.editor_section_container, { marginTop: 20 }]}>
                             <Text style={styles.editor_section_title}>Image</Text>
 
                             <View style={styles.editor_image_chooser_container}>
@@ -259,6 +298,9 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
 
                             </View>
                         </View>
+
+
+
 
 
                         <View>
@@ -315,7 +357,7 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
                                     backgroundColor: "blue",
                                     borderRadius: 10,
                                     textAlign: 'center',
-                                    padding: 5
+                                    paddingTop: 10, paddingBottom: 10
 
                                 }} >Update Shop</Text>
                             </TouchableOpacity>
