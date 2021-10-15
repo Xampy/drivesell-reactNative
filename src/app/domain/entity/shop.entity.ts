@@ -8,6 +8,7 @@ export interface ShopEntityInterface {
     id?: string;
     latitude: string;
     longitude: string;
+    imageUrl: string
 }
 
 export default class ShopEntity {
@@ -19,6 +20,7 @@ export default class ShopEntity {
     private city: string;
     private latitude: string;
     private longitude: string;
+    private imageUrl: string
 
     constructor(name: string, description: string, city: string,
         provinceOrRegion: string,
@@ -32,6 +34,7 @@ export default class ShopEntity {
 
         this.latitude = "";
         this.longitude = "";
+        this.imageUrl = "";
 
         this.id = "";
     }
@@ -44,6 +47,7 @@ export default class ShopEntity {
     public getCountry(){return this.country;}
     public getLatitude(){return this.latitude;}
     public getLongitude(){return this.longitude;}
+    public getImageUrl(){return this.imageUrl;}
 
     public setId(id: string){this.id = "" + id;}
     public setName(name: string){
@@ -55,4 +59,5 @@ export default class ShopEntity {
     public setCountry(country: string){this.country = "" + country;}
     public setLatitude(lat: string){this.latitude = "" + lat;}
     public setLongitude(long: string){this.longitude = "" + long;}
+    public setImageUrl(val: string){this.imageUrl = "" + val;}
 }

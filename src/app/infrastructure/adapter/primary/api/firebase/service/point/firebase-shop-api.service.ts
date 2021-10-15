@@ -131,6 +131,7 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
                         d.setId(doc.id);
                         d.setLongitude(data.longitude);
                         d.setLatitude(data.latitude);
+                        d.setImageUrl(data.imageUrl);
 
                         console.log("In firebase shop service get shop by id");
                         console.log(d);
@@ -169,7 +170,8 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
                     name: request.getShop().getName(),
                     description: request.getShop().getDescription(),
                     latitude: request.getShop().getLatitude(),
-                    longitude: request.getShop().getLongitude()
+                    longitude: request.getShop().getLongitude(),
+                    imageUrl: request.getShop().getImageUrl()
                 }
             ).then(
                 () => {
@@ -199,7 +201,8 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
                 name: request.getName(),
                 description: request.getDescription(),
                 latitude: request.getLatitude(),
-                longitude: request.getLongitude()
+                longitude: request.getLongitude(),
+                imageUrl: ""
             }
         ).then(
             (value) => {

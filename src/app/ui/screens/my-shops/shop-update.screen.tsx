@@ -1,12 +1,17 @@
 import CheckBox from '@react-native-community/checkbox';
+import { utils } from '@react-native-firebase/app';
+
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
+import RNFetchBlob from 'react-native-fetch-blob';
 import Geolocation from 'react-native-geolocation-service';
 import { connect } from 'react-redux';
 import { AppContextInterface } from '../../../app.context';
 import ShopEntity from '../../../domain/entity/shop.entity';
 import UpdateUserShopPresenter, { UpdateShopViewModel } from '../../../infrastructure/presenter/update-user-shop.presenter';
+import { getPlatformPath } from '../../../share/file.tools';
+import { requestStoragePermission } from '../../../share/storage.tools';
 import BackWithTitleTopBarComponent from '../../components/core/back-with-title-top-bar.component';
 import MenuWithTitleTopBarComponent from '../../components/core/menu-with-tile-top-bar.component';
 import ShopListItemComponent from '../../components/shop/shop-list-item.component';
@@ -29,10 +34,10 @@ interface IState {
     distance: number,
     time: number,
     image_filename: string,
-    image_uri: any,
+    image_uri: any | null,
 
     openEditor: boolean,
-    toggleCheckBox: boolean
+    toggleCheckBox: boolean,
 }
 
 class ShopUpdateScreen extends React.Component<IProps, IState> {
@@ -45,7 +50,9 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
     private shopProvinceOrRegion: string;
 
     private updateUserShopViewModel: UpdateShopViewModel;
-    hasLocationPermission: Promise<boolean | null> | null;
+    private hasLocationPermission: Promise<boolean | null> | null;
+    private hasStoragePermission: Promise<boolean | null> | null;
+    filePath: null | string;
 
     constructor(props: any) {
         super(props);
@@ -55,6 +62,8 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
         console.log(this.props);
 
         this.hasLocationPermission = null;
+        this.hasStoragePermission = null;
+        this.filePath = null;
 
         this.updateUserShopViewModel = {
             setShopValue: (shop) => {
@@ -108,7 +117,7 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
             distance: 0,
             time: 0,
             image_filename: "filename",
-            image_uri: null,
+            image_uri: this.shop.getImageUrl().length > 0 ? this.shop.getImageUrl() : null,
 
             openEditor: false,
             toggleCheckBox: false
@@ -118,6 +127,8 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
 
     componentDidMount() {
         this.hasLocationPermission = requestLocationPermission();
+
+        this.hasStoragePermission = requestStoragePermission();
     }
 
 
@@ -163,6 +174,20 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
                 type: [DocumentPicker.types.images]
             });
 
+            this.filePath = null;
+
+            RNFetchBlob.fs.stat(res.uri).then(
+                (stats) => {
+                    console.log(stats.path);
+                    this.filePath = stats.path
+                }
+            ).catch(
+                (err) => {
+                    console.error(err);
+                }
+            )
+
+
             this.setState({
                 image_filename: res.name,
                 image_uri: res.uri
@@ -176,59 +201,92 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
         }
     }
 
+
+    private _updateShopFields = () => {
+        const latestLocation = {
+            latestShopCity: this.shop.getCity(),
+            latestShopProvinceOrRegion: this.shop.getProvinceOrRegion(),
+            latestShopCountry: this.shop.getCountry()
+        }
+
+        this.shop.setName(this.shopName);
+        this.shop.setDescription(this.shopDescription);
+
+        //Sorry for the name
+        if (this.state.toggleCheckBox == true) {
+            Geolocation.getCurrentPosition(
+                (position) => {
+                    console.log(position);
+
+                    this.shop.setLatitude(`${position.coords.latitude}`);
+                    this.shop.setLongitude(`${position.coords.longitude}`);
+
+                    this.props.context.appContainer.controllerFactory
+                        .getShopController().updateShop(
+                            {
+                                shop: this.shop,
+                                ...latestLocation
+                            },
+
+                            new UpdateUserShopPresenter(this.updateUserShopViewModel)
+                        );
+
+                },
+                (error) => {
+                    // See error code charts below.
+                    console.log(error.code, error.message);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+            );
+        } else {
+            //Don't want to update the postiion
+            this.props.context.appContainer.controllerFactory
+                .getShopController().updateShop(
+                    {
+                        shop: this.shop,
+                        ...latestLocation
+                    },
+
+                    new UpdateUserShopPresenter(this.updateUserShopViewModel)
+                );
+        }
+    }
+
     private _updateShop = () => {
         if (this.props.context != undefined) {
             console.log("\n\n\nUpdate shop...");
 
-            const latestLocation = {
-                latestShopCity: this.shop.getCity(),
-                latestShopProvinceOrRegion: this.shop.getProvinceOrRegion(),
-                latestShopCountry: this.shop.getCountry()
+            //[START] updload the image file if it exists
+            console.log("View image uri");
+            console.log(this.state.image_uri);
+            if (this.hasStoragePermission != null){
+                if(this.filePath != null){
+                    this.props.context.appContainer.storageFactory
+                        .getFirebaseStorage()
+                        .uploadFile(
+                            "shops",
+                            this.props.context.appContainer.loginContainer.userId + "_" + this.state.image_filename,
+                            this.filePath
+                        ).then(
+                            (url) => {
+                                if (url != undefined){
+                                    this.filePath = null;
+                                    this.shop.setImageUrl(url);
+                                    
+                                    this._updateShopFields();
+                                }
+                            }
+                        ).catch(
+                            (error) => {
+                                console.error(error);
+                            }
+                        )
+                }else {
+                    //Nothing to do
+                }
+            }else {
+                this.hasStoragePermission = requestStoragePermission();
             }
-
-            this.shop.setName(this.shopName);
-            this.shop.setDescription(this.shopDescription);
-
-            //Sorry for the name
-            if (this.state.toggleCheckBox == true) {
-                Geolocation.getCurrentPosition(
-                    (position) => {
-                        console.log(position);
-
-                        this.shop.setLatitude(`${position.coords.latitude}`);
-                        this.shop.setLongitude(`${position.coords.longitude}`);
-
-                        this.props.context.appContainer.controllerFactory
-                            .getShopController().updateShop(
-                                {
-                                    shop: this.shop,
-                                    ...latestLocation
-                                },
-
-                                new UpdateUserShopPresenter(this.updateUserShopViewModel)
-                            );
-
-                    },
-                    (error) => {
-                        // See error code charts below.
-                        console.log(error.code, error.message);
-                    },
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-                );
-            } else {
-                //Don't want to update the postiion
-                this.props.context.appContainer.controllerFactory
-                    .getShopController().updateShop(
-                        {
-                            shop: this.shop,
-                            ...latestLocation
-                        },
-
-                        new UpdateUserShopPresenter(this.updateUserShopViewModel)
-                    );
-            }
-
-
         }
 
     }
@@ -384,7 +442,7 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
                 <View style={{ padding: 10 }}>
                     <ShopListItemComponent
                         name={this.state.name} description={this.state.description}
-                        distance={0} time={0} ></ShopListItemComponent>
+                        distance={0} time={0} imageUri={this.state.image_uri} ></ShopListItemComponent>
                 </View>
 
                 {this._renderEditProductBtn()}

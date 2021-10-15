@@ -17,6 +17,7 @@ import AppContainer from './src/app/share/container/app.container';
 
 import '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import { rootReducer } from './src/app/ui/store';
@@ -29,6 +30,7 @@ import AppStackNavigator from './src/app/ui/navigation/app.navigation';
 const App = (props: any) => {
     if (__DEV__) {
         firestore().useEmulator('localhost', 8080);
+        storage().useEmulator('localhost', 9199);
         firestore().settings({
             cacheSizeBytes: 50 * 1000000
         })

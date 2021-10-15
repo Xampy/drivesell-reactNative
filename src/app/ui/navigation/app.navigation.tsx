@@ -13,7 +13,7 @@ const AppStackNavigator = () => {
 
     return (
         <AppStack.Navigator
-            initialRouteName="Splash-Screen"
+            initialRouteName="Main-Screen"
             screenOptions={
                 {
                     headerShown: false

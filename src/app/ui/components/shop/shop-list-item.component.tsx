@@ -10,7 +10,9 @@ interface IProps {
     description: string,
     distance: number,
     time: number,
-    location?: string
+    location?: string,
+
+    imageUri: any | null
 }
 
 interface IState {
@@ -22,18 +24,43 @@ const shopImage = require('../../../../assets/img/shop/shop-default.jpg');
 
 class ShopListItemComponent extends React.Component<IProps, IState> {
 
-    constructor(props: any){
+    constructor(props: any) {
         super(props);
+    }
+
+    private _renderImage = () => {
+        if (this.props.imageUri == null) {
+            return (
+                <Image
+                    source={
+                        shopImage}
+                    style={styles.image}
+                />
+            );
+        }else{
+            if(typeof this.props.imageUri == 'string'){
+                return (
+                    <Image
+                        source={{uri: this.props.imageUri}}
+                        style={styles.image}
+                    />
+                );
+            }
+            return (
+                <Image
+                    source={this.props.imageUri}
+                    style={styles.image}
+                />
+            );
+        }
+
     }
 
     render() {
         return (
             <View style={styles.container}>
                 <View style={styles.shop_item_image_container}>
-                    <Image
-                        source={shopImage}
-                        style={styles.image}
-                    />
+                    {this._renderImage()}
                 </View>
                 <View style={styles.shop_item_container}>
                     <Text style={styles.shop_item_value}>{this.props.name}</Text>

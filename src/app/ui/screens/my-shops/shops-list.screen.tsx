@@ -47,7 +47,8 @@ class ShopsListScreen extends React.Component<IProps, IState> {
             }>
                 <ShopListItemComponent 
                     name={item.name} description={item.description}
-                    distance={0} time={0} ></ShopListItemComponent>
+                    distance={0} time={0} 
+                    imageUri={item.getImageUrl().length > 0 ? item.getImageUrl() : null} ></ShopListItemComponent>
             </TouchableOpacity>
         );  
     }
