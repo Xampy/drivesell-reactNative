@@ -52,7 +52,7 @@ class ShopUpdateScreen extends React.Component<IProps, IState> {
     private updateUserShopViewModel: UpdateShopViewModel;
     private hasLocationPermission: Promise<boolean | null> | null;
     private hasStoragePermission: Promise<boolean | null> | null;
-    filePath: null | string;
+    private filePath: null | string;
 
     constructor(props: any) {
         super(props);

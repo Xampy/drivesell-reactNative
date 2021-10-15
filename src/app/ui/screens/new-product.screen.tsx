@@ -17,6 +17,8 @@ import ShopProductEntity from '../../domain/entity/product.entity';
 import { AppContextInterface } from '../../app.context';
 import NewUserShopProductCreatePresenter, { NewShopProductViewModel } from '../../infrastructure/presenter/new-user-shop-product-create.presenter';
 import { ADD_USER_SHOP_PRODUCT, UserShopsProductsActionType } from '../store/myShop/products/type';
+import RNFetchBlob from 'react-native-fetch-blob';
+import { requestStoragePermission } from '../../share/storage.tools';
 
 
 
@@ -37,10 +39,10 @@ interface IState {
     sub_1_image_filename: string,
     sub_2_image_filename: string,
     sub_3_image_filename: string,
-    main_image_uri: any,
-    sub_1_image_uri: any,
-    sub_2_image_uri: any,
-    sub_3_image_uri: any,
+    main_image_uri: any | null,
+    sub_1_image_uri: any | null,
+    sub_2_image_uri: any | null,
+    sub_3_image_uri: any | null,
 
 
     product_name: string,
@@ -69,6 +71,12 @@ class NewProductScreen extends React.Component<IProps, IState> {
     private shopProduct: ShopProductEntity;
     private createShopProductViewModel: NewShopProductViewModel;
 
+    private mainImageFilePath: null | string;
+    private sub1ImageFilePath: null | string;
+    private sub2ImageFilePath: null | string;
+    private sub3ImageFilePath: null | string;
+    hasStoragePermission: Promise<boolean | null> | null;
+
 
     constructor(props: any) {
         super(props);
@@ -79,10 +87,10 @@ class NewProductScreen extends React.Component<IProps, IState> {
             sub_1_image_filename: 'filename',
             sub_2_image_filename: 'filename',
             sub_3_image_filename: 'filename',
-            main_image_uri: undefined,
-            sub_1_image_uri: undefined,
-            sub_2_image_uri: undefined,
-            sub_3_image_uri: undefined,
+            main_image_uri: null,
+            sub_1_image_uri: null,
+            sub_2_image_uri: null,
+            sub_3_image_uri: null,
 
             //Product informations
             product_name: "Product Name",
@@ -98,6 +106,13 @@ class NewProductScreen extends React.Component<IProps, IState> {
             showSuccessDialog: false,
             selectedShop: 'default'
         };
+
+        this.hasStoragePermission = null;
+
+        this.mainImageFilePath = null;
+        this.sub1ImageFilePath = null;
+        this.sub2ImageFilePath = null;
+        this.sub3ImageFilePath = null;
 
 
 
@@ -133,6 +148,10 @@ class NewProductScreen extends React.Component<IProps, IState> {
         }
     }
 
+    componentDidMount() {
+        this.hasStoragePermission = requestStoragePermission();
+    }
+
 
 
     private _renderDialog = () => {
@@ -146,7 +165,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
                 <Dialog.Button label="Continue" onPress={
                     () => {
                         this.setState({ showSuccessDialog: false });
-                        if(this.props.navigation != undefined){
+                        if (this.props.navigation != undefined) {
                             this.props.navigation.navigate("My Products");
                         }
                     }} />
@@ -171,7 +190,11 @@ class NewProductScreen extends React.Component<IProps, IState> {
 
     _renderProduct = ({ item }: any) => {
         console.log(item);
-        return <ProductImagesComponent></ProductImagesComponent>
+        return <ProductImagesComponent
+            mainImageUri={item.getMainImage().length > 0 ? item.getMainImage() : null}
+            sub1ImageUri={item.getSubOneImage().length > 0 ? item.getSubOneImage() : null}
+            sub2ImageUri={item.getSubTwoImage().length > 0 ? item.getSubTwoImage() : null}
+            sub3ImageUri={item.getSubThreeImage().length > 0 ? item.getSubThreeImage() : null} />
     }
 
     _renderOrderModal = () => {
@@ -238,6 +261,65 @@ class NewProductScreen extends React.Component<IProps, IState> {
     }
 
 
+
+    private _uploadFiles = async (callback: Function) => {
+        if (this.hasStoragePermission != null) {
+            try {
+                if (this.props.context != undefined) {
+                    const paths = [
+                        this.mainImageFilePath, this.sub1ImageFilePath,
+                        this.sub3ImageFilePath, this.sub3ImageFilePath
+                    ];
+
+
+                    for (let index = 0; index < paths.length; index++) {
+                        const path = paths[index];
+
+                        let filename = "";
+                        switch (index) {
+                            case 0: filename = this.state.main_image_filename; break;
+                            case 1: filename = this.state.sub_1_image_filename; break;
+                            case 2: filename = this.state.sub_2_image_filename; break;
+                            case 3: filename = this.state.sub_3_image_filename; break;
+                        }
+
+                        if (path != null) {
+
+                            const url = await this.props.context.appContainer.storageFactory
+                                .getFirebaseStorage()
+                                .uploadFile(
+                                    "products",
+                                    this.props.context.appContainer.loginContainer.userId + "_" + filename,
+                                    path
+                                );
+
+                            if (url != undefined) {
+                                switch (index) {
+                                    case 0: this.shopProduct.setMainImage(url); break;
+                                    case 1: this.shopProduct.setSubOneImage(url); break;
+                                    case 2: this.shopProduct.setSubTwoImage(url); break;
+                                    case 3: this.shopProduct.setSubThreeImage(url); break;
+                                }
+                            }
+                        } else {
+                            //Nothing to do
+                        }
+
+                    }//[END] Uploading images files
+
+
+                    //Move to next
+                    callback();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            this.hasStoragePermission = requestStoragePermission();
+        }
+
+    }
+
     private _publishProduct = () => {
         console.log("\n\n\nPushing producct....");
         this._setEditorVisibility(false);
@@ -252,25 +334,25 @@ class NewProductScreen extends React.Component<IProps, IState> {
         this.shopProduct.setDetails(this.state.product_details);
         this.shopProduct.setShippings(this.state.product_shipping_way);
 
-        this.shopProduct.setMainImage(this.state.main_image_filename);
-        this.shopProduct.setSubOneImage(this.state.sub_1_image_filename);
-        this.shopProduct.setSubTwoImage(this.state.sub_2_image_filename);
-        this.shopProduct.setSubThreeImage(this.state.sub_3_image_filename);
         console.log(this.shopProduct);
 
-        //Validate condition
-        console.log("Shops list ", this.props.shops )
-        if (this.props.context != undefined) {
-            this.props.context.appContainer.controllerFactory
-                .getShopProductController()
-                .createShopProduct(
-                    {
-                        product: this.shopProduct,
-                        shop: this.props.shops.filter((s) => s.getId() === this.shopProduct.getShopId())[0]
-                    },
-                    new NewUserShopProductCreatePresenter(this.createShopProductViewModel)
-                )
-        }
+        this._uploadFiles(
+            () => {
+                //Validate condition
+                console.log("Shops list ", this.props.shops)
+                if (this.props.context != undefined) {
+                    this.props.context.appContainer.controllerFactory
+                        .getShopProductController()
+                        .createShopProduct(
+                            {
+                                product: this.shopProduct,
+                                shop: this.props.shops.filter((s) => s.getId() === this.shopProduct.getShopId())[0]
+                            },
+                            new NewUserShopProductCreatePresenter(this.createShopProductViewModel)
+                        )
+                }
+            }
+        );
     }
 
     render() {
@@ -362,23 +444,30 @@ class NewProductScreen extends React.Component<IProps, IState> {
                 type: [DocumentPicker.types.images]
             });
 
+            const path = (await RNFetchBlob.fs.stat(res.uri)).path;
+
             console.log(JSON.stringify(res));
             if (name == "main_image") {
+                this.mainImageFilePath = "" + path;
                 this.setState({
                     main_image_filename: res.name,
                     main_image_uri: res.uri
                 })
             } else if (name == "sub_1_image") {
+                this.sub1ImageFilePath = "" + path;
                 this.setState({
                     sub_1_image_filename: res.name,
                     sub_1_image_uri: res.uri
                 })
             } else if (name == "sub_2_image") {
+                this.sub2ImageFilePath = "" + path;
+
                 this.setState({
                     sub_2_image_filename: res.name,
                     sub_2_image_uri: res.uri
                 })
             } else if (name == "sub_3_image") {
+                this.sub3ImageFilePath = "" + path;
                 this.setState({
                     sub_3_image_filename: res.name,
                     sub_3_image_uri: res.uri
@@ -508,12 +597,12 @@ class NewProductScreen extends React.Component<IProps, IState> {
 
                             <View style={styles.editor_section_container}>
                                 <Picker
-                                selectedValue={this.state.selectedShop}
+                                    selectedValue={this.state.selectedShop}
                                     onValueChange={(itemValue: string) => {
                                         console.log(itemValue);
                                         this.shopProduct.setShopId(itemValue);
 
-                                        this.setState({selectedShop: itemValue});
+                                        this.setState({ selectedShop: itemValue });
                                     }}>
                                     <Picker.Item key={"default_shop_iii"} label={"choose..."} value={"default"} />
                                     {

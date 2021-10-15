@@ -11,11 +11,11 @@ const product_sub_3_image = require("../../../../assets/img/product/product_sub_
 
 
 interface IProps {
-    updateImageCallback?: Function
-    mainImageUri?: any
-    sub1ImageUri?: any,
-    sub2ImageUri?: any,
-    sub3ImageUri?: any,
+    updateImageCallback?: Function,
+    mainImageUri: any | null,
+    sub1ImageUri: any | null,
+    sub2ImageUri: any | null,
+    sub3ImageUri: any | null,
 
     handleClick?: Function
 }
@@ -36,6 +36,33 @@ class ProductImagesComponent extends React.Component<IProps, IState> {
             this.props.handleClick(uri);
         }
     }
+
+    private _renderImage = (val: null | any, type: "main" | "sub") => {
+        if (val == null) {
+            return (
+                <Image
+                    source={ type == "main" ? product_main_image : product_sub_1_image}
+                    style={ type == "main" ? styles.product_main_image : styles.product_sub_image}
+                />
+            );
+        }else{
+            if(typeof val == 'string'){
+                return (
+                    <Image
+                        source={{uri: val}}
+                        style={type == "main" ? styles.product_main_image : styles.product_sub_image}
+                    />
+                );
+            }
+            return (
+                <Image
+                    source={val}
+                    style={ type == "main" ? styles.product_main_image : styles.product_sub_image }
+                />
+            );
+        }
+
+    }
     render() {
         return (
             <View style={styles.bottom_images_container} >
@@ -43,35 +70,31 @@ class ProductImagesComponent extends React.Component<IProps, IState> {
                 <View style={styles.images_container}>
                     <View style={styles.main_image_container} >
                         <TouchableOpacity onPress={() => { this._handleClickOnImage(this.props.mainImageUri) }}>
-                            <Image
-                                source={this.props.mainImageUri == null ? product_main_image : { uri: this.props.mainImageUri }}
-                                style={styles.product_main_image}
-                            />
+                            {
+                                this._renderImage(this.props.mainImageUri, "main")
+                            }
                         </TouchableOpacity>
                     </View>
                     <View style={styles.sub_images_container} >
                         <View style={styles.sub_image_container}>
                             <TouchableOpacity onPress={() => { this._handleClickOnImage(this.props.sub1ImageUri) }}>
-                                <Image
-                                    source={this.props.sub1ImageUri == null ? product_sub_1_image : { uri: this.props.sub1ImageUri }}
-                                    style={styles.product_sub_image}
-                                />
+                            {
+                                this._renderImage(this.props.sub1ImageUri, "sub")
+                            }
                             </TouchableOpacity>
                         </View>
                         <View style={styles.sub_image_container}>
                             <TouchableOpacity onPress={() => { this._handleClickOnImage(this.props.sub2ImageUri) }}>
-                                <Image
-                                    source={this.props.sub2ImageUri == null ? product_sub_2_image : { uri: this.props.sub2ImageUri }}
-                                    style={styles.product_sub_image}
-                                />
+                            {
+                                this._renderImage(this.props.sub2ImageUri, "sub")
+                            }
                             </TouchableOpacity>
                         </View>
                         <View style={styles.sub_image_container}>
                             <TouchableOpacity onPress={() => { this._handleClickOnImage(this.props.sub3ImageUri) }}>
-                                <Image
-                                    source={this.props.sub3ImageUri == null ? product_sub_3_image : { uri: this.props.sub3ImageUri }}
-                                    style={styles.product_sub_image}
-                                />
+                            {
+                                this._renderImage(this.props.sub3ImageUri, "sub")
+                            }
                             </TouchableOpacity>
                         </View>
                     </View>
