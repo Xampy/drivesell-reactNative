@@ -268,7 +268,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
                 if (this.props.context != undefined) {
                     const paths = [
                         this.mainImageFilePath, this.sub1ImageFilePath,
-                        this.sub3ImageFilePath, this.sub3ImageFilePath
+                        this.sub2ImageFilePath, this.sub3ImageFilePath
                     ];
 
 

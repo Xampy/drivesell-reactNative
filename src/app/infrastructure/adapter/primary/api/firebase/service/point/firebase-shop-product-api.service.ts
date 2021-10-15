@@ -165,12 +165,14 @@ export default class FirebaseShopProductApiService implements FirebaseShopProduc
                 (value) => {
                     console.log("\n", value.id);
 
-                    let shopProduct = new ShopProductEntity(
+                    /*let shopProduct = new ShopProductEntity(
                         request.getProduct().getName(),
                         request.getProduct().getPrice(),
                         request.getProduct().getReduction(),
                         request.getProduct().getDescription()
-                    );
+                    );*/
+
+                    let shopProduct = request.getProduct()
 
                     shopProduct.setId(value.id);
                     shopProduct.setShopId(request.getShop().getId());

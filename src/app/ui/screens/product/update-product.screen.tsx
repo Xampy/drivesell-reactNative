@@ -19,6 +19,8 @@ import { RootStateType } from '../../store';
 import { UserShopsProductsActionType, ADD_USER_SHOP_PRODUCT, UPDATE_USER_SHOP_PRODUCT } from '../../store/myShop/products/type';
 import BackWithTitleTopBarComponent from '../../components/core/back-with-title-top-bar.component';
 import UpdateShopProductPresenter, { UpdateShopProductViewModel } from '../../../infrastructure/presenter/update-shop-product.presenter';
+import { requestStoragePermission } from '../../../share/storage.tools';
+import RNFetchBlob from 'react-native-fetch-blob';
 
 const user_icon = require('../../../../assets/img/user_icon.png');
 
@@ -71,6 +73,12 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
     private shopIdBackuped: string;
     private updateShopProductViewModel: UpdateShopProductViewModel;
 
+    private mainImageFilePath: null | string;
+    private sub1ImageFilePath: null | string;
+    private sub2ImageFilePath: null | string;
+    private sub3ImageFilePath: null | string;
+    private hasStoragePermission: Promise<boolean | null> | null;
+
 
 
     constructor(props: any) {
@@ -85,10 +93,18 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
             sub_1_image_filename: 'filename',
             sub_2_image_filename: 'filename',
             sub_3_image_filename: 'filename',
-            main_image_uri: undefined,
-            sub_1_image_uri: undefined,
-            sub_2_image_uri: undefined,
-            sub_3_image_uri: undefined,
+            main_image_uri: (
+                this.shopProduct != undefined && 
+                this.shopProduct.getMainImage() != null) ? this.shopProduct.getMainImage() : null,
+            sub_1_image_uri: (
+                this.shopProduct != undefined && 
+                this.shopProduct.getSubOneImage() != null) ? this.shopProduct.getSubOneImage() : null,
+            sub_2_image_uri: (
+                this.shopProduct != undefined && 
+                this.shopProduct.getSubTwoImage() != null) ? this.shopProduct.getSubTwoImage() : null,
+            sub_3_image_uri: (
+                this.shopProduct != undefined && 
+                this.shopProduct.getSubThreeImage() != null) ? this.shopProduct.getSubThreeImage() : null,
 
             //Product informations
             product_name: this.shopProduct?.getName(),
@@ -104,6 +120,13 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
             showSuccessDialog: false,
             selectedShop: this.shopProduct?.getShopId()
         };
+
+        this.hasStoragePermission = null;
+
+        this.mainImageFilePath = null;
+        this.sub1ImageFilePath = null;
+        this.sub2ImageFilePath = null;
+        this.sub3ImageFilePath = null;
 
 
 
@@ -144,6 +167,10 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
         }
     }
 
+    componentDidMount() {
+        this.hasStoragePermission = requestStoragePermission();
+    }
+
 
 
     private _renderDialog = () => {
@@ -182,7 +209,11 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
 
     _renderProduct = ({ item }: any) => {
         console.log(item);
-        return <ProductImagesComponent></ProductImagesComponent>
+        return <ProductImagesComponent
+            mainImageUri={item.getMainImage()?.length > 0 ? item.getMainImage() : null}
+            sub1ImageUri={item.getSubOneImage()?.length > 0 ? item.getSubOneImage() : null}
+            sub2ImageUri={item.getSubTwoImage()?.length > 0 ? item.getSubTwoImage() : null}
+            sub3ImageUri={item.getSubThreeImage().length > 0 ? item.getSubThreeImage() : null} />
     }
 
     _renderOrderModal = () => {
@@ -242,28 +273,85 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
     }
 
 
+    
+
+    private _uploadFiles = async (callback: Function) => {
+        if (this.hasStoragePermission != null) {
+            try {
+                if (this.props.context != undefined) {
+                    const paths = [
+                        this.mainImageFilePath, this.sub1ImageFilePath,
+                        this.sub2ImageFilePath, this.sub3ImageFilePath
+                    ];
 
 
+                    for (let index = 0; index < paths.length; index++) {
+                        const path = paths[index];
+
+                        let filename = "";
+                        switch (index) {
+                            case 0: filename = this.state.main_image_filename; break;
+                            case 1: filename = this.state.sub_1_image_filename; break;
+                            case 2: filename = this.state.sub_2_image_filename; break;
+                            case 3: filename = this.state.sub_3_image_filename; break;
+                        }
+
+                        if (path != null) {
+
+                            const url = await this.props.context.appContainer.storageFactory
+                                .getFirebaseStorage()
+                                .uploadFile(
+                                    "products",
+                                    this.props.context.appContainer.loginContainer.userId + "_" + filename,
+                                    path
+                                );
+
+                            if (url != undefined) {
+                                switch (index) {
+                                    case 0: this.shopProduct.setMainImage(url); break;
+                                    case 1: this.shopProduct.setSubOneImage(url); break;
+                                    case 2: this.shopProduct.setSubTwoImage(url); break;
+                                    case 3: this.shopProduct.setSubThreeImage(url); break;
+                                }
+                            }
+                        } else {
+                            //Nothing to do
+                        }
+
+                    }//[END] Uploading images files
+
+
+                    //Move to next
+                    callback();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            this.hasStoragePermission = requestStoragePermission();
+        }
+
+    }
 
     private _publishProduct = () => {
         console.log("\n\n\nPushing producct....");
         this._setEditorVisibility(false);
-        if (this.shopProduct != undefined) {
-            this.shopProduct.setName(this.productName);
-            this.shopProduct.setDescription(this.productDescription);
-            this.shopProduct.setPrice(this.productPrice);
-            this.shopProduct.setReduction(this.productReduction);
+        this.shopProduct.setName(this.state.product_name);
+        this.shopProduct.setName(this.productName);
+        this.shopProduct.setDescription(this.state.product_description);
+        this.shopProduct.setDescription(this.productDescription);
+        this.shopProduct.setPrice(this.state.product_price);
+        this.shopProduct.setPrice(this.productPrice);
+        this.shopProduct.setReduction(this.state.product_reduction);
 
-            this.shopProduct.setDetails(this.state.product_details);
-            this.shopProduct.setShippings(this.state.product_shipping_way);
+        this.shopProduct.setDetails(this.state.product_details);
+        this.shopProduct.setShippings(this.state.product_shipping_way);
 
-            this.shopProduct.setMainImage(this.state.main_image_filename);
-            this.shopProduct.setSubOneImage(this.state.sub_1_image_filename);
-            this.shopProduct.setSubTwoImage(this.state.sub_2_image_filename);
-            this.shopProduct.setSubThreeImage(this.state.sub_3_image_filename);
-            console.log(this.shopProduct);
+        console.log(this.shopProduct);
 
-            //Validate condition
+        this._uploadFiles(
+            () => {
+                //Validate condition
             console.log("Shops list ", this.props.shops)
             if (this.props.context != undefined) {
                 if (this.shopProduct != null) {
@@ -279,8 +367,10 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
                         )
                 }
             }
-        }
+            }
+        )
     }
+
 
     private _goBackNavigation = () => {
         console.log(this.props);
@@ -376,29 +466,37 @@ class UpdateShopProductScreen extends React.Component<IProps, IState> {
         )
     }
 
+    
     private _getImageFile = async (name: string) => {
         try {
             const res = await DocumentPicker.pick({
                 type: [DocumentPicker.types.images]
             });
 
+            const path = (await RNFetchBlob.fs.stat(res.uri)).path;
+
             console.log(JSON.stringify(res));
             if (name == "main_image") {
+                this.mainImageFilePath = "" + path;
                 this.setState({
                     main_image_filename: res.name,
                     main_image_uri: res.uri
                 })
             } else if (name == "sub_1_image") {
+                this.sub1ImageFilePath = "" + path;
                 this.setState({
                     sub_1_image_filename: res.name,
                     sub_1_image_uri: res.uri
                 })
             } else if (name == "sub_2_image") {
+                this.sub2ImageFilePath = "" + path;
+
                 this.setState({
                     sub_2_image_filename: res.name,
                     sub_2_image_uri: res.uri
                 })
             } else if (name == "sub_3_image") {
+                this.sub3ImageFilePath = "" + path;
                 this.setState({
                     sub_3_image_filename: res.name,
                     sub_3_image_uri: res.uri
