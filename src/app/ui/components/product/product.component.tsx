@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Octicons from 'react-native-vector-icons/Octicons';
+import ShopProductEntity from '../../../domain/entity/product.entity';
+import ShopEntity from '../../../domain/entity/shop.entity';
 import ProductImagesComponent from './product-images.component';
 
 const user_icon = require("../../../../assets/img/user_icon.png");
@@ -13,7 +15,8 @@ interface IProps {
     handleTopClick?: Function,
     handleDiscussionClick?: Function,
 
-    product: any
+    product: ShopProductEntity,
+    shop: ShopEntity
 }
 
 interface IState {
@@ -30,14 +33,14 @@ class ProductComponent extends React.Component<IProps, IState> {
         console.log("Clicked on image");
         console.log(imageUri);
 
-        if(this.props.handleImageClick != undefined)
+        if (this.props.handleImageClick != undefined)
             this.props.handleImageClick(imageUri);
     }
 
     private _handleTopClick = () => {
         console.log('Cliked on top');
 
-        if(this.props.handleTopClick != undefined){
+        if (this.props.handleTopClick != undefined) {
             this.props.handleTopClick();
         }
     }
@@ -45,7 +48,7 @@ class ProductComponent extends React.Component<IProps, IState> {
     private _handleDiscussionClick = () => {
         console.log("Clicked discussion");
 
-        if(this.props.handleDiscussionClick != undefined){
+        if (this.props.handleDiscussionClick != undefined) {
             this.props.handleDiscussionClick();
         }
     }
@@ -57,7 +60,9 @@ class ProductComponent extends React.Component<IProps, IState> {
                 <View style={styles.top_container}>
                     <View style={styles.top_user_icon_container}>
                         <Image
-                            source={user_icon}
+                            source={ (
+                                this.props.shop.getImageUrl() ==  null || 
+                                this.props.shop.getImageUrl().length < 1)?  user_icon : this.props.shop.getImageUrl()}
                             style={styles.user_icon}
                         />
                     </View>
@@ -66,16 +71,15 @@ class ProductComponent extends React.Component<IProps, IState> {
                         <TouchableOpacity onPress={() => { this._handleTopClick() }}>
                             <View style={styles.price_name_container}>
                                 <View style={styles.price_container}>
-                                    <Text style={styles.price_value} >25.05 $</Text>
+                                    <Text style={styles.price_value} >{this.props.product.getPrice()} $</Text>
                                 </View>
                                 <View style={styles.product_name_container}>
-                                    <Text style={styles.product_name_value} >Hearphone AUSS-3455 </Text>
+                                    <Text style={styles.product_name_value} >{this.props.product.getName()} </Text>
                                 </View>
                             </View>
 
                             <View style={styles.product_description_container}>
-                                <Text>Lorem ipsum dolor sit amet, consectetur usmod tempor incididunt ut labore et
-                                    dolore magna aliqua usmod tempor incididunt ut labore et dolore magna aliqua   </Text>
+                                <Text>{this.props.product.getDescription()}</Text>
                             </View>
                         </TouchableOpacity>
 
@@ -86,7 +90,7 @@ class ProductComponent extends React.Component<IProps, IState> {
 
 
                     <View style={styles.user_container}>
-                        <Text style={styles.username_value}>Xampy</Text>
+                        <Text style={styles.username_value}></Text>
 
                         <View style={{ marginTop: 10 }}>
                             <TouchableOpacity onPress={() => { this._handleDiscussionClick(); }}>
@@ -95,7 +99,20 @@ class ProductComponent extends React.Component<IProps, IState> {
                         </View>
                     </View>
 
-                    <ProductImagesComponent handleClick={this._handleImageClick}></ProductImagesComponent>
+                    <ProductImagesComponent
+                        mainImageUri={(
+                            this.props.product != undefined && 
+                            this.props.product.getMainImage() != null) ? this.props.product.getMainImage() : null}
+                        sub1ImageUri={(
+                            this.props.product != undefined && 
+                            this.props.product.getSubOneImage() != null) ? this.props.product.getSubOneImage() : null}
+                        sub2ImageUri={(
+                            this.props.product != undefined && 
+                            this.props.product.getSubTwoImage() != null) ? this.props.product.getSubTwoImage() : null}
+                        sub3ImageUri={(
+                            this.props.product != undefined && 
+                            this.props.product.getSubThreeImage() != null) ? this.props.product.getSubThreeImage() : null}
+                        handleClick={this._handleImageClick}></ProductImagesComponent>
                 </View>
 
 

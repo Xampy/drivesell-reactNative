@@ -797,7 +797,7 @@ class NewProductScreen extends React.Component<IProps, IState> {
                                             backgroundColor: "blue",
                                             borderRadius: 10,
                                             textAlign: 'center',
-                                            padding: 5
+                                            paddingTop: 10, paddingBottom: 10
 
                                         }} >Publish</Text>
                                     </TouchableOpacity>

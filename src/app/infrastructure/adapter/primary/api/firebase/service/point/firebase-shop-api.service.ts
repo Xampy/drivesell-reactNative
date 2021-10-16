@@ -13,9 +13,10 @@ import GetShopFirebaseResponse from "../../../../../../../domain/dto/response/ap
 import GetShopProductsFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/shop/get-shop-products-firebase.request";
 import GetShopProductsFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/get-shopProducts-firebase.response";
 import ShopProductEntity from "../../../../../../../domain/entity/product.entity";
+import GetShopsFirebaseRequest from "../../../../../../../domain/dto/request/api/firebase/shop/get-shops-firebase.request";
+import GetShopsFirebaseResponse from "../../../../../../../domain/dto/response/api/firebase/shop/get-shops-firebase.response";
 
 export default class FirebaseShopApiService implements FirebaseShopApiServiceInterface {
-
 
 
     public create(request: CreateShopFirebaseRequest) {
@@ -47,6 +48,14 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
                 this.handleFindByDoc(
                     request,
                     resolve, reject)
+            }
+        );
+    }
+
+    public findByLocation(request: GetShopsFirebaseRequest) {
+        return new Promise<GetShopsFirebaseResponse>(
+            (resolve, reject) => {
+                this.handleFindByLocation(request, resolve, reject);
             }
         );
     }
@@ -149,6 +158,55 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
                     reject(error);
                 }
             );
+    }
+
+    private handleFindByLocation(request: GetShopsFirebaseRequest,
+        resolve: Function, reject: Function) {
+        let response: GetShopsFirebaseResponse;
+
+        const path: string = request.getCountry() + "_" +
+            request.getProvinceOrRegion() + "_" +
+            request.getCity() + "_shops";
+
+        console.log(path);
+
+
+        firestore().collection(path).get().then(
+            (querySnapshot) => {
+                console.log(querySnapshot);
+
+                const shops: ShopEntity[] = [];
+
+                querySnapshot.forEach(
+                    (doc) => {
+                        const data = doc.data();
+                        if (data != undefined) {
+                            const d = new ShopEntity(
+                                data.name, data.description,
+                                request.getCity(), request.getProvinceOrRegion(), request.getCountry()
+                            );
+
+                            d.setId(doc.id);
+                            d.setLongitude(data.longitude);
+                            d.setLatitude(data.latitude);
+                            d.setImageUrl(data.imageUrl);
+
+                            console.log("In firebase shop service get shops");
+                            console.log(d);
+                            shops.push(d);                           
+                        }
+                    }
+                );
+
+                response = new GetShopsFirebaseResponse(shops, null);
+                resolve(response);
+            }
+        ).catch(
+            (error) => {
+                console.log(error);
+                reject(error);
+            }
+        );
     }
 
 

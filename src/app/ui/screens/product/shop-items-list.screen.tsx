@@ -158,7 +158,7 @@ class ShopItemsListScreen extends React.Component<IProps, IState> {
                         <View key={"product_" + item.getId()} style={styles.product_container}>
                             <View style={styles.product_image_container}>
                                 <Image
-                                    source={product_image}
+                                    source={ item.getMainImage() == null ? product_image : {uri: item.getMainImage()}}
                                     style={styles.product_image}
                                 />
                             </View>

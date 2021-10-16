@@ -45,6 +45,7 @@ const HomeTabBottomNavigator = () => {
             tabBarOptions={{
                 activeTintColor: 'blue',
                 inactiveTintColor: 'gray',
+                keyboardHidesTabBar: true
             }}
             initialRouteName="Shop"> 
             <HomeTabBottom.Screen

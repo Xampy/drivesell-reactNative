@@ -122,6 +122,10 @@ class SplashScreen extends React.Component<IProps, IState> {
                             this.shopCountry = val.country;
                             this.shopCity = val.city;
 
+                            (this.context as AppContextInterface).appContainer.loginContainer.currentCity = val.city;
+                            (this.context as AppContextInterface).appContainer.loginContainer.currentProvinceOrRegion = val.provinceOrRegion;
+                            (this.context as AppContextInterface).appContainer.loginContainer.currentCountry = val.country;
+
                         }
                     }
                 ).catch(

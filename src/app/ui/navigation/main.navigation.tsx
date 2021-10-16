@@ -81,7 +81,7 @@ const MainDrawerNavigator = () => {
                         }
                     },
                 })}
-                initialRouteName="My Products">
+                initialRouteName="Home">
                 <MainDrawer.Screen
                     name="Home"
                     component={SecondaryMainTabBottomNavigator} />

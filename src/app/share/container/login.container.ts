@@ -4,6 +4,9 @@ import { DEFAULT_USER_FIREBASE_DOC_ID } from "../../infrastructure/adapter/prima
 
 export default class LoginContainer {
     public userId: string;
+    public currentCity: string = "";
+    public currentProvinceOrRegion: string = "";
+    public currentCountry: string = "";
 
     constructor(){
         this.userId = DEFAULT_USER_FIREBASE_DOC_ID;

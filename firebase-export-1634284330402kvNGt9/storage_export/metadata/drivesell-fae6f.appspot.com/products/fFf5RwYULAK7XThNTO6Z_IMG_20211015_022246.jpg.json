@@ -1,0 +1,20 @@
+{
+  "name": "products/fFf5RwYULAK7XThNTO6Z_IMG_20211015_022246.jpg",
+  "bucket": "drivesell-fae6f.appspot.com",
+  "contentType": "image/jpeg",
+  "metageneration": 1,
+  "generation": 1634283604989,
+  "storageClass": "STANDARD",
+  "etag": "someETag",
+  "contentDisposition": "inline",
+  "cacheControl": "no-store",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "4cb1377f-4d44-408f-8f19-29caa1ad6e5b"
+  ],
+  "timeCreated": "2021-10-15T07:40:04.988Z",
+  "updated": "2021-10-15T07:40:04.989Z",
+  "size": 200943,
+  "md5Hash": "a8qLrXeUQBtwbO5THZ81Dw==",
+  "crc32c": "2714664036"
+}
