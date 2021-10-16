@@ -9,7 +9,8 @@ const iconName: string = "ios-information-circle";
 
 interface IProps {
     toggler: Function,
-    filterProductsByNameHandler: Function
+    filterProductsByNameHandler: Function,
+    locationClick: Function
 }
 
 interface IState {
@@ -24,16 +25,18 @@ class DefaultTopBarComponent extends React.Component<IProps, IState> {
         this.state = {
             searchIsOpened: false
         }
+
+        console.log(this.state)
     }
 
-   
+
 
     private _setSearchVisibility = (val: boolean) => {
         this.setState({ searchIsOpened: val });
     }
 
     private _searchTextHandler = (text: string) => {
-        if(text.length > 0){
+        if (text.length > 0) {
             this.props.filterProductsByNameHandler(text);
         }
     }
@@ -43,7 +46,7 @@ class DefaultTopBarComponent extends React.Component<IProps, IState> {
             return (
                 <View style={{ flex: 3, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
-                    onChangeText={this._searchTextHandler}
+                        onChangeText={this._searchTextHandler}
                         placeholder={"search here"}
                         placeholderTextColor="#FFFFFF"
                         underlineColorAndroid="#FFFFFF"
@@ -54,10 +57,15 @@ class DefaultTopBarComponent extends React.Component<IProps, IState> {
             )
         } else {
             return (
-                <View style={{ flex: 3, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                    <MaterialIcons name={"place"} size={25} color={"#FFFFFF"} />
-                    <Text style={{marginLeft: 10, color: '#FFFFFF' }}>Lome, Maritime-Togo</Text>
-                </View>
+                <TouchableOpacity onPress={() => {
+                    console.log("Click on location made");
+                    this.props.locationClick();
+                }}>
+                    <View style={{ flex: 3, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialIcons name={"place"} size={25} color={"#FFFFFF"} />
+                        <Text style={{ marginLeft: 10, color: '#FFFFFF' }}>Lome, Maritime-Togo</Text>
+                    </View>
+                </TouchableOpacity>
             )
 
         }

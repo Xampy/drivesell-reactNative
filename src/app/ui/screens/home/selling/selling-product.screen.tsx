@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import DefaultTopBarComponent from '../../../components/core/default-top-bar.component';
 import ProductComponent from '../../../components/product/product.component';
@@ -12,6 +12,7 @@ import { requestLocationPermission } from '../../../location.tools';
 import GetLocalShopsProductsPresenter, { GetLocalShopsProductsViewModel } from '../../../../infrastructure/presenter/get-local-shops-products.presenter';
 import ShopProductEntity from '../../../../domain/entity/product.entity';
 import ShopEntity from '../../../../domain/entity/shop.entity';
+import LocationChangeModalComponent from '../../../components/core/location-change-modal.component';
 
 interface IProps {
     navigation: any,
@@ -19,7 +20,8 @@ interface IProps {
 }
 
 interface IState {
-    shopsProductsFiltered: ShopProductEntity[];
+    shopsProductsFiltered: ShopProductEntity[],
+    showLocationChangeModal: boolean
 }
 
 class SellingProductScreen extends React.Component<IProps, IState> {
@@ -30,20 +32,29 @@ class SellingProductScreen extends React.Component<IProps, IState> {
     private getLocalShopsProductsViewModel: GetLocalShopsProductsViewModel;
     private shops: ShopEntity[];
     private shopsProducts: ShopProductEntity[];
+    private city: string;
+    private country: string;
+    private provinceOrRegion: string;
 
 
     constructor(props: any) {
         super(props);
 
+        console.log("In constructor");
         console.log(this.context);
 
         this.state = {
-            shopsProductsFiltered: []
+            shopsProductsFiltered: [],
+            showLocationChangeModal: false
         }
 
         this.hasLocationPermission = null;
         this.shops = [];
         this.shopsProducts = [];
+
+        this.city = "";  //Pass this values as props to the component
+        this.country = "";
+        this.provinceOrRegion = "";
 
 
         this.getLocalShopsProductsViewModel = {
@@ -52,7 +63,7 @@ class SellingProductScreen extends React.Component<IProps, IState> {
                     this.shops = shops;
                     this.shopsProducts = products;
 
-                    this.setState({shopsProductsFiltered: [...this.shopsProducts]});
+                    this.setState({ shopsProductsFiltered: [...this.shopsProducts] });
                 }
             }
         }
@@ -65,15 +76,29 @@ class SellingProductScreen extends React.Component<IProps, IState> {
 
         this.hasLocationPermission.then(
             (val) => {
-                if (val == true){
+                if (val == true) {
+                    //Check the country city and province vale to be not null or empty string
+                    //To be done when finished
                     this._getLocalShopsProducts()
                 }
             }
+        ).catch(
+            (error) => {
+                console.error(error);
+            }
         )
+
+        setTimeout(() => {
+            this.city = (this.context as AppContextInterface).appContainer.loginContainer.currentCity;
+            this.provinceOrRegion = (this.context as AppContextInterface).appContainer.loginContainer.currentProvinceOrRegion;
+            this.country = (this.context as AppContextInterface).appContainer.loginContainer.currentCountry;
+
+            //this.setState({});
+        }, 3000);
 
     }
 
-    componentDidUpdate(){
+    componentDidUpdate() {
         console.log("Component do update");
     }
 
@@ -87,9 +112,9 @@ class SellingProductScreen extends React.Component<IProps, IState> {
                         .getUserController()
                         .getLocalShops(
                             {
-                                city: "Lome",
-                                provinceOrRegion: "Maritime",
-                                country: "Togo",
+                                city: this.city.length > 0 ? this.city : "Lome",
+                                provinceOrRegion: this.provinceOrRegion.length > 0 ? this.provinceOrRegion : "Maritime",
+                                country: this.country.length > 0 ? this.country : "Togo",
 
                                 latitude: `${position.coords.latitude}`,
                                 longitude: `${position.coords.longitude}`
@@ -126,11 +151,11 @@ class SellingProductScreen extends React.Component<IProps, IState> {
         console.log("Clicked discussion");
     }
 
-    private _renderProduct = ({ item }: any ) => {
+    private _renderProduct = ({ item }: any) => {
         console.log(item);
 
         const shop = this.shops.find(s => s.getId() == (item as ShopProductEntity).getShopId());
-        if(shop != undefined)
+        if (shop != undefined)
             return (
                 <ProductComponent
                     product={item}
@@ -153,7 +178,7 @@ class SellingProductScreen extends React.Component<IProps, IState> {
         console.log("Filtering by name : ", val);
         console.log(this.shopsProducts.filter(
             p => p.getName().includes(val)));
-            
+
         this.setState(
             {
                 shopsProductsFiltered: val.length > 0 ? this.shopsProducts.filter(
@@ -162,12 +187,55 @@ class SellingProductScreen extends React.Component<IProps, IState> {
         )
     }
 
+    private _renderNoProductsMessage = () => {
+        if (this.state.shopsProductsFiltered.length == 0) {
+            return <Text style={{ fontSize: 15, padding: 10 }}>No results</Text>
+        }
+    }
+
+    private _handleLocationChange = (changes: {city: string, provinceOrRegion: string, country: string}) => {
+        this.country = changes.country;
+        this.city = changes.city;
+        this.provinceOrRegion = changes.provinceOrRegion;
+
+        console.log("\n\n\nChanging location");
+        console.log([this.country, this.city, this.provinceOrRegion]);
+        console.log([this.country, this.city, this.provinceOrRegion]);
+
+        this.setState({ showLocationChangeModal: false });
+
+        //Fetch products
+    }
+
+    private _handleLocationClick = () => {
+        console.log("Want to show the modal");
+        this.setState({ showLocationChangeModal: true });
+    }
+
+    private _renderLocationChangeModal = () => {
+        if (this.state.showLocationChangeModal)
+            return (
+                <LocationChangeModalComponent
+                    city={this.city}
+                    provinceOrRegion={this.provinceOrRegion}
+                    country={this.country}
+                    onRequestCloseCallback={this._handleLocationChange}
+                    showModal={true} />
+            )
+    }
     render() {
         return (
             <View style={styles.container}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                    <DefaultTopBarComponent filterProductsByNameHandler={this._filterProductsByName} toggler={this._toggleDrawerNavigation} ></DefaultTopBarComponent>
+
+
+                    {this._renderLocationChangeModal()}
+
+                    <DefaultTopBarComponent
+                        filterProductsByNameHandler={this._filterProductsByName}
+                        locationClick={this._handleLocationClick}
+                        toggler={this._toggleDrawerNavigation} ></DefaultTopBarComponent>
 
                     <FlatList
                         style={{ padding: 10 }}
@@ -176,6 +244,10 @@ class SellingProductScreen extends React.Component<IProps, IState> {
                         renderItem={this._renderProduct}
                         keyExtractor={(item) => item.getId().toString()}
                     />
+
+                    {
+                        this._renderNoProductsMessage()
+                    }
                 </KeyboardAvoidingView>
 
 
@@ -188,7 +260,7 @@ class SellingProductScreen extends React.Component<IProps, IState> {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF',
         flex: 1,
     }
 });
