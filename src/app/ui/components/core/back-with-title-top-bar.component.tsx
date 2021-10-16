@@ -32,7 +32,7 @@ class BackWithTitleTopBarComponent extends React.Component<IProps, IState> {
                         this.props.backCallback();
                             
                     }}>
-                        <AntDesign name={"arrowleft"} size={30} color={"#000000"} />
+                        <AntDesign name={"arrowleft"} size={30} color={"#FFFFFF"} />
                     </TouchableOpacity>
 
                     
@@ -48,7 +48,7 @@ class BackWithTitleTopBarComponent extends React.Component<IProps, IState> {
 const styles = StyleSheet.create({
     container: {
         padding: 10,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#007ACC',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -72,7 +72,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         marginLeft: 10,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: "white"
     },
 });
 

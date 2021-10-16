@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { StyleSheet, Text, Touchable, TouchableOpacity, View } from 'react-native';
+import { color } from 'react-native-reanimated';
 import Feather from 'react-native-vector-icons/Feather';
 
 
@@ -34,7 +35,7 @@ class MenuWithTitleTopBarComponent extends React.Component<IProps, IState> {
                                 this.props.toggler();
                         }
                     }>
-                        <Feather name={"menu"} size={30} color={"#000000"} />
+                        <Feather name={"menu"} size={30} color={"#FFFFFF"} />
                     </TouchableOpacity>
                 </View>
                 <View>
@@ -48,7 +49,7 @@ class MenuWithTitleTopBarComponent extends React.Component<IProps, IState> {
 const styles = StyleSheet.create({
     container: {
         padding: 10,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#007ACC',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -72,7 +73,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 20,
         marginLeft: 10,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: 'white'
     },
 });
 

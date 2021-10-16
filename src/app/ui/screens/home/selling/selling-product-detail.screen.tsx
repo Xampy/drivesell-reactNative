@@ -6,6 +6,9 @@ import ProductOrderModalComponent from '../../../components/product/core/product
 import PriceDetailTopBarComponent from '../../../components/product/product-detail-top-bar.component';
 import ProductImagesComponent from '../../../components/product/product-images.component';
 import Octicons from 'react-native-vector-icons/Octicons';
+import ShopEntity from '../../../../domain/entity/shop.entity';
+import ShopProductEntity from '../../../../domain/entity/product.entity';
+import BackWithTitleTopBarComponent from '../../../components/core/back-with-title-top-bar.component';
 
 
 const user_icon = require('../../../../../assets/img/user_icon.png');
@@ -32,7 +35,8 @@ const detail_data = [
 ];
 
 interface IProps {
-
+    navigation: any,
+    route: any
 }
 
 interface IState {
@@ -42,6 +46,9 @@ interface IState {
 
 class SellingProductDetailScreen extends React.Component<IProps, IState> {
 
+    private shop: ShopEntity;
+    private shopProduct: ShopProductEntity;
+
     constructor(props: any) {
         super(props);
 
@@ -50,10 +57,14 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
             hasWantToOrder: false, //CHnage it to false later
             hasPlacedOrder: false
         }
+
+        console.log(this.props);
+        this.shop = this.props.route.params.shop;
+        this.shopProduct = this.props.route.params.product;
     }
 
 
-    _renderOrderNowBtn = () => {
+    private _renderOrderNowBtn = () => {
         if (!this.state.hasWantToOrder) {
             return (
                 <TouchableOpacity
@@ -67,35 +78,31 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
         }
     }
 
-    _setOrderingModalVisible = (visibile: boolean) => {
+    private _setOrderingModalVisible = (visibile: boolean) => {
         this.setState({ hasWantToOrder: visibile });
     }
 
-    _renderProduct = (item: any) => {
-        console.log(item);
-        return <ProductImagesComponent></ProductImagesComponent>
-    }
 
     private _handleOrderPlacement = () => {
         console.log("Render order +");
-        this.setState({hasPlacedOrder: true});
-        
+        this.setState({ hasPlacedOrder: true });
+
     }
-    
+
     _renderOrderModal = () => {
         if (this.state.hasWantToOrder) {
             return (
                 <ProductOrderModalComponent
                     hasWantToOrder={true}
                     hasPlacedOrder={this.state.hasPlacedOrder}
-                    placeOrder={ this._handleOrderPlacement }
+                    placeOrder={this._handleOrderPlacement}
                     onRequestCloseCallback={() => { this._setOrderingModalVisible(false) }} ></ProductOrderModalComponent>
             )
         }
     }
 
     private _renderDescriptionRows = () => {
-        return shipping_data[0].data.map(
+        return this.shopProduct.getShippings().map(
             (item, index) => {
                 return (
                     <View key={"description_row_" + index} style={{ display: 'flex', flexDirection: 'row', marginTop: 9 }}>
@@ -114,7 +121,7 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
      * Review this function
      */
     private _renderProductDetailRows = () => {
-        return detail_data[0].data.map(
+        return this.shopProduct.getDetails().map(
             (item, index) => {
                 return (
                     <View key={"product_detail_row_" + index} style={{ display: 'flex', flexDirection: 'row', marginTop: 9 }}>
@@ -130,11 +137,40 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
         );
     }
 
+    private _renderProductPriceContainer = () => {
+        if (this.shopProduct.getReduction() > 0) {
+            const p = (
+                this.shopProduct.getPrice() -
+                this.shopProduct.getPrice() * this.shopProduct.getReduction()
+            ).toFixed(2)
+
+            return (
+                <View style={styles.product_price_container}>
+                    <Text style={styles.product_price_old}>{this.shopProduct.getPrice()}$</Text>
+                    <Text style={styles.product_price}>{p} $</Text>
+                </View>
+            )
+        }
+        return (
+            <View style={styles.product_price_container}>
+
+                <Text style={styles.product_price}>{
+                    this.shopProduct.getPrice()} $</Text>
+            </View>
+        )
+    }
+
+    private _goBackNavigation = () => {
+        console.log(this.props);
+        if (this.props.navigation != undefined)
+            this.props.navigation.goBack();
+    }
+
     render() {
         return (
             <View style={styles.container}>
                 {this._renderOrderModal()}
-                <PriceDetailTopBarComponent></PriceDetailTopBarComponent>
+                <BackWithTitleTopBarComponent backCallback={this._goBackNavigation} title={this.shopProduct.getName()} />
 
                 <ScrollView
                     showsVerticalScrollIndicator={false}
@@ -146,13 +182,15 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
                         <View style={styles.user_container} >
                             <View style={styles.user_image_container}>
                                 <Image
-                                    source={user_icon}
+                                    source={ (
+                                        this.shop.getImageUrl() == null || this.shop.getImageUrl().length == 0
+                                        ) ? user_icon : {uri: this.shop.getImageUrl()}}
                                     style={styles.user_icon}
                                 />
                             </View>
                             <View style={styles.user_informations_container}>
                                 <View style={styles.user_data_container}>
-                                    <Text style={styles.username}>Xampy</Text>
+                                    <Text style={styles.username}>{this.shop.getName()}</Text>
                                     <Text style={styles.user_profil}>@see more</Text>
                                 </View>
                                 <View style={{ marginTop: 10 }}>
@@ -171,25 +209,39 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
                             keyExtractor={(item) => item.id.toString()}
                         />*/}
 
-                        <ProductImagesComponent></ProductImagesComponent>
+                        <ProductImagesComponent
+                            mainImageUri={(
+                                this.shopProduct != undefined &&
+                                this.shopProduct.getMainImage() != null) ? this.shopProduct.getMainImage() : null}
+                            sub1ImageUri={(
+                                this.shopProduct != undefined &&
+                                this.shopProduct.getSubOneImage() != null) ? this.shopProduct.getSubOneImage() : null}
+                            sub2ImageUri={(
+                                this.shopProduct != undefined &&
+                                this.shopProduct.getSubTwoImage() != null) ? this.shopProduct.getSubTwoImage() : null}
+                            sub3ImageUri={(
+                                this.shopProduct != undefined &&
+                                this.shopProduct.getSubThreeImage() != null) ? this.shopProduct.getSubThreeImage() : null}
+                            handleClick={
+                                () => {
+
+                                }
+                            }>
+                        </ProductImagesComponent>
 
                         <View style={styles.product_description_container}>
 
                             <View style={styles.product_top_description_container}>
                                 <View style={styles.product_name_container}>
-                                    <Text style={styles.product_name}>Headphone ASSUR</Text>
+                                    <Text style={styles.product_name}>{this.shopProduct.getName()}</Text>
                                 </View>
-                                <View style={styles.product_price_container}>
-                                    <Text style={styles.product_price_old}>30 $</Text>
-                                    <Text style={styles.product_price}>25 $</Text>
-                                </View>
+                                {this._renderProductPriceContainer()}
                             </View>
 
                             <View style={styles.product_description_text_container}>
                                 <Text style={styles.section_header_title} >DESCRIPTION</Text>
 
-                                <Text style={styles.description_text} >{'\u2022'}Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                                    sed do eiusmod tempor incididunt ut labore et dolore magna </Text>
+                                <Text style={styles.description_text} >{this.shopProduct.getDescription()} </Text>
 
                                 <View style={styles.shipping_container}>
                                     {this._renderDescriptionRows()}
@@ -284,7 +336,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         marginLeft: 10,
-        alignItems: 'center'
+        alignItems: 'flex-start'
     },
 
 

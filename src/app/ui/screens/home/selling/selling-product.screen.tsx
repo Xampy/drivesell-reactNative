@@ -132,18 +132,27 @@ class SellingProductScreen extends React.Component<IProps, IState> {
         );
     }
 
-    private _handleImageClick = (imageUri: any) => {
+    private _handleImageClick = (shop: ShopEntity, product: ShopProductEntity) => {
         console.log("Clicked on image in selling product");
-        console.log(imageUri);
+
+        this.props.navigation.navigate(
+            "Selling-Product-Detail-Screen",
+            {
+                product: product,
+                shop: shop
+            }
+        )
     }
 
-    private _handleTopClick = () => {
+    private _handleTopClick = (shop: ShopEntity, product: ShopProductEntity) => {
         console.log('Cliked on top');
 
         this.props.navigation.navigate(
-            "Selling-Product-Detail-Screen", {
-            product: 12 //Put product data here
-        }
+            "Selling-Product-Detail-Screen",
+            {
+                product: product,
+                shop: shop
+            }
         )
     }
 
@@ -193,7 +202,7 @@ class SellingProductScreen extends React.Component<IProps, IState> {
         }
     }
 
-    private _handleLocationChange = (changes: {city: string, provinceOrRegion: string, country: string}) => {
+    private _handleLocationChange = (changes: { city: string, provinceOrRegion: string, country: string }) => {
         this.country = changes.country;
         this.city = changes.city;
         this.provinceOrRegion = changes.provinceOrRegion;
@@ -238,7 +247,7 @@ class SellingProductScreen extends React.Component<IProps, IState> {
                         toggler={this._toggleDrawerNavigation} ></DefaultTopBarComponent>
 
                     <FlatList
-                        style={{ padding: 10 }}
+                        style={{ padding: 10, paddingBottom: 100 }}
                         showsVerticalScrollIndicator={false}
                         data={this.state.shopsProductsFiltered}
                         renderItem={this._renderProduct}

@@ -33,15 +33,16 @@ class ProductComponent extends React.Component<IProps, IState> {
         console.log("Clicked on image");
         console.log(imageUri);
 
+        console.log(this.props);
         if (this.props.handleImageClick != undefined)
-            this.props.handleImageClick(imageUri);
+            this.props.handleImageClick(this.props.shop, this.props.product);
     }
 
     private _handleTopClick = () => {
         console.log('Cliked on top');
 
         if (this.props.handleTopClick != undefined) {
-            this.props.handleTopClick();
+            this.props.handleTopClick(this.props.shop, this.props.product);
         }
     }
 

@@ -93,13 +93,16 @@ export default class FirebaseShopApiService implements FirebaseShopApiServiceInt
 
                             p.setId(doc.id);
                             p.setDetails(data.details);
-                            p.setShippings(data.shipping);
-                            p.setMainImage(data.MainImage);
+                            p.setShippings(data.shippings);
+                            p.setMainImage(data.mainImage);
                             p.setSubOneImage(data.subOneImage);
                             p.setSubTwoImage(data.subTwoImage);
                             p.setSubThreeImage(data.subThreeImage);
 
                             p.setShopId(data.shopId);
+                            
+                            console.log("\n\n\n\Debugging shop");
+                            console.log(p);
 
                             return p;
                         }
