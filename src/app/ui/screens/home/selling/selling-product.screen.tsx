@@ -4,7 +4,7 @@ import { Alert, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View
 import DefaultTopBarComponent from '../../../components/core/default-top-bar.component';
 import ProductComponent from '../../../components/product/product.component';
 
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { DEFALT_LIST_DATA } from '../../../../../assets/data/default-list';
 import AppContext, { AppContextInterface } from '../../../../app.context';
 import Geolocation from 'react-native-geolocation-service';
@@ -160,13 +160,13 @@ class SellingProductScreen extends React.Component<IProps, IState> {
         console.log("Clicked discussion");
     }
 
-    private _renderProduct = ({ item }: any) => {
+    private _renderProduct = (item: ShopProductEntity) => {
         console.log(item);
 
         const shop = this.shops.find(s => s.getId() == (item as ShopProductEntity).getShopId());
         if (shop != undefined)
             return (
-                <ProductComponent
+                <ProductComponent key={"product_" + item.getId()}
                     product={item}
                     shop={shop}
                     handleDiscussionClick={this._handleDiscussionClick}
@@ -237,26 +237,25 @@ class SellingProductScreen extends React.Component<IProps, IState> {
             <View style={styles.container}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}>
-
-
-                    {this._renderLocationChangeModal()}
-
                     <DefaultTopBarComponent
                         filterProductsByNameHandler={this._filterProductsByName}
                         locationClick={this._handleLocationClick}
                         toggler={this._toggleDrawerNavigation} ></DefaultTopBarComponent>
-
-                    <FlatList
-                        style={{ padding: 10, paddingBottom: 100 }}
+                    <ScrollView 
                         showsVerticalScrollIndicator={false}
-                        data={this.state.shopsProductsFiltered}
-                        renderItem={this._renderProduct}
-                        keyExtractor={(item) => item.getId().toString()}
-                    />
-
-                    {
-                        this._renderNoProductsMessage()
-                    }
+                        style={{marginBottom: 10, paddingLeft: 10, paddingEnd: 10}}>
+                        {
+                            this.state.shopsProductsFiltered.map(
+                                (product) => {
+                                    return this._renderProduct(product)
+                                }
+                            )
+                        }
+                        {
+                            this._renderNoProductsMessage()
+                        }
+                    </ScrollView>
+                    {this._renderLocationChangeModal()}
                 </KeyboardAvoidingView>
 
 
@@ -271,6 +270,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#FFFFFF',
         flex: 1,
+        paddingBottom: 50
     }
 });
 

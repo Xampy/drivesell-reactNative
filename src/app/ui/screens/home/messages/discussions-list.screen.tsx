@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { View } from 'react-native';
 import { DEFALT_LIST_DATA } from '../../../../../assets/data/default-list';
 import BackWithTitleTopBarComponent from '../../../components/core/back-with-title-top-bar.component';
+import MenuWithTitleTopBarComponent from '../../../components/core/menu-with-tile-top-bar.component';
 import TitleTopBarComponent from '../../../components/core/title-top-bar.component';
 import DiscussionsListItemComponent from '../../../components/discussion/discussions-list-item.component';
 
@@ -38,10 +39,15 @@ class DiscussionsListScreen extends React.Component<IProps, IState> {
             </TouchableOpacity>
         )
     }
+    private _toggleDrawerNavigation = () => {
+        console.log(this.props);
+        if (this.props.navigation != undefined)
+            this.props.navigation.toggleDrawer();
+    }
     render(){
         return(
             <View style={styles.container}>
-                <TitleTopBarComponent title={"Discussions"}/>
+                <MenuWithTitleTopBarComponent toggler={this._toggleDrawerNavigation} title={"Discussions"} />
                 <View style={ styles.discussion_items_container } >
                     <FlatList
                         showsVerticalScrollIndicator={false}

@@ -36,9 +36,7 @@ class DefaultTopBarComponent extends React.Component<IProps, IState> {
     }
 
     private _searchTextHandler = (text: string) => {
-        if (text.length > 0) {
-            this.props.filterProductsByNameHandler(text);
-        }
+        this.props.filterProductsByNameHandler(text);
     }
 
     private _renderSearchInput = () => {
@@ -47,7 +45,7 @@ class DefaultTopBarComponent extends React.Component<IProps, IState> {
                 <View style={{ flex: 3, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                         onChangeText={this._searchTextHandler}
-                        placeholder={"search here"}
+                        placeholder={"search name here"}
                         placeholderTextColor="#FFFFFF"
                         underlineColorAndroid="#FFFFFF"
                         style={{ flex: 1, color: '#FFFFFF' }}

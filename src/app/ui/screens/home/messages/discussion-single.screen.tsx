@@ -46,10 +46,16 @@ class DiscussionSingleScreen extends React.Component<IProps, IState> {
         console.log(this.state.messages);
     }
 
+    private _goBackNavigation = () => {
+        console.log(this.props);
+        if (this.props.navigation != undefined)
+            this.props.navigation.goBack();
+    }
+
     render() {
         return (
             <View style={styles.container}>
-                <DiscussionTopBarComponent></DiscussionTopBarComponent>
+                <DiscussionTopBarComponent backCallback={this._goBackNavigation} ></DiscussionTopBarComponent>
                 <View style={styles.messages_container}>
                     <FlatList
                         style={{ paddingBottom: 50 }}
@@ -81,7 +87,7 @@ class DiscussionSingleScreen extends React.Component<IProps, IState> {
                     </View>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end' }}>
                         <TouchableOpacity onPress={this._handleSendClick}>
-                            <MaterialCommunityIcons name={"send-circle"} size={40} />
+                            <MaterialCommunityIcons name={"send-circle"} color={"#007ACC"} size={40} />
                         </TouchableOpacity>
                     </View>
                 </View>

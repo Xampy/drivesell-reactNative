@@ -16,6 +16,9 @@ import AppContext from "../../app.context";
 import ShopItemsListScreen from "../screens/product/shop-items-list.screen";
 import MyShopsStackNavigator from "./my-shops.navigation";
 import MyShopsProductsProductsStackNavigator from "./products.navigation";
+import MessagingStackNavigator from "./home/messages.navigation";
+import Octicons from "react-native-vector-icons/Octicons";
+import SellingProductStackNavigator from "./home/selling-product.navigation";
 
 
 const MainDrawer = createDrawerNavigator();
@@ -36,6 +39,11 @@ const MainDrawerNavigator = () => {
                         if (route.name === 'Home') {
                             return <Entypo
                                 name="home"
+                                size={size}
+                                color={color} />
+                        } else if (route.name === 'Discussions') {
+                            return <Octicons
+                                name="comment-discussion"
                                 size={size}
                                 color={color} />
                         } else if (route.name === 'New Product') {
@@ -84,9 +92,10 @@ const MainDrawerNavigator = () => {
                 initialRouteName="Home">
                 <MainDrawer.Screen
                     name="Home"
-                    component={SecondaryMainTabBottomNavigator} />
-
-
+                    component={SellingProductStackNavigator} />
+                <MainDrawer.Screen
+                    name="Discussions"
+                    component={MessagingStackNavigator} />
                 <MainDrawer.Screen
                     name="Buy Orders"
                     component={BuyOrdersStackNavigator} />

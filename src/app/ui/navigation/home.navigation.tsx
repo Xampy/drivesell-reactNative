@@ -7,6 +7,7 @@ import MessagingStackNavigator from './home/messages.navigation';
 import NotificationsStackNavigator from './home/notifications.navigation';
 import Entypo from 'react-native-vector-icons/Entypo';
 import ShopsStackNavigator from './shop.navigation';
+import Octicons from 'react-native-vector-icons/Octicons';
 
 const HomeTabBottom = createBottomTabNavigator();
 
@@ -23,7 +24,7 @@ const HomeTabBottomNavigator = () => {
                             name="CodeSandbox"
                             size={size}
                             color={color} />
-                    } else if (route.name === 'Shops') {
+                    }/* else if (route.name === 'Shops') {
                         return <Entypo
                             name="shop"
                             size={size}
@@ -33,9 +34,9 @@ const HomeTabBottomNavigator = () => {
                             name="bells"
                             size={size}
                             color={color} />
-                    } else if (route.name === 'Messages') {
-                        return <AntDesign
-                            name="mail"
+                    } */else if (route.name === 'Messages') {
+                        return <Octicons
+                            name="comment-discussion"
                             size={size}
                             color={color} />
                     }
@@ -51,12 +52,12 @@ const HomeTabBottomNavigator = () => {
             <HomeTabBottom.Screen
                 name="Selling"
                 component={SellingProductStackNavigator} />
-            <HomeTabBottom.Screen
+            {/*<HomeTabBottom.Screen
                 name="Shops"
                 component={ShopsStackNavigator} />
             <HomeTabBottom.Screen
                 name="Notifications"
-                component={NotificationsStackNavigator} />
+            component={NotificationsStackNavigator} />*/}
             <HomeTabBottom.Screen
                 name="Messages"
                 component={MessagingStackNavigator} />
