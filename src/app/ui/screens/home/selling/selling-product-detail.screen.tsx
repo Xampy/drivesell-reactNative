@@ -93,10 +93,11 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
         if (this.state.hasWantToOrder) {
             return (
                 <ProductOrderModalComponent
+                    product={this.shopProduct} shop={this.shop} 
                     hasWantToOrder={true}
                     hasPlacedOrder={this.state.hasPlacedOrder}
                     placeOrder={this._handleOrderPlacement}
-                    onRequestCloseCallback={() => { this._setOrderingModalVisible(false) }} ></ProductOrderModalComponent>
+                    onRequestCloseCallback={() => { this._setOrderingModalVisible(false); } }></ProductOrderModalComponent>
             )
         }
     }
@@ -292,7 +293,7 @@ const styles = StyleSheet.create({
         width: 100,
         height: 40,
         borderRadius: 30,
-        backgroundColor: 'blue',
+        backgroundColor: '#007ACC',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

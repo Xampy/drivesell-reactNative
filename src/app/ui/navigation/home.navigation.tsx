@@ -43,7 +43,7 @@ const HomeTabBottomNavigator = () => {
             })}
 
             tabBarOptions={{
-                activeTintColor: 'blue',
+                activeTintColor: '#007ACC',
                 inactiveTintColor: 'gray',
                 keyboardHidesTabBar: true
             }}

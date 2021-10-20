@@ -1,15 +1,25 @@
 import * as React from 'react';
-import { Image, Modal, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import ShopProductEntity from '../../../../domain/entity/product.entity';
+import ShopEntity from '../../../../domain/entity/shop.entity';
+import { getGPSDistance, requestLocationPermission } from '../../../location.tools';
+import Geolocation from 'react-native-geolocation-service';
+import MapViewDirections from 'react-native-maps-directions';
 
 const main_product_image = require("../../../../../assets/img/product/product_main.jpg");
 
+const GOOGLE_API_KEY = "AIzaSyCFKpD2GztNGFknwr5rY-BPDaYoxfMlM04";
+
+
+
 interface IProps {
+    product: ShopProductEntity,
+    shop: ShopEntity,
     hasWantToOrder: boolean,
     onRequestCloseCallback: Function,
 
@@ -19,21 +29,75 @@ interface IProps {
 
 interface IState {
     hasWantToOrder: boolean,
-    hasPlacedOrder: boolean
+    hasPlacedOrder: boolean,
+    userLocation: { latitude: number, longitude: number},
+    fetchedDistance: any,
+    fetchedDuration: any,
 }
 
 
 class ProductOrderModalComponent extends React.Component<IProps, IState> {
+    private hasLocationPermission: boolean;
 
     constructor(props: any) {
         super(props);
 
         this.state = {
             hasWantToOrder: this.props.hasWantToOrder,
-            hasPlacedOrder: this.props.hasPlacedOrder
+            hasPlacedOrder: this.props.hasPlacedOrder,
+            userLocation: {
+                latitude: +this.props.shop.getLatitude(), 
+                longitude: +this.props.shop.getLongitude()
+            },
+            fetchedDistance: 0,
+            fetchedDuration: 0,
         }
 
         console.log("state", this.state);
+        this.hasLocationPermission = false;
+    }
+
+    componentDidMount() {
+        requestLocationPermission().then(
+            (value) => {
+                if (value != null && value == true) {
+                    this.hasLocationPermission = value;
+                    Geolocation.getCurrentPosition(
+                        (position) => {
+
+                            const distance = getGPSDistance(
+                                {latitude: position.coords.latitude, longitude: position.coords.longitude},
+                                {latitude: +this.props.shop.getLatitude(), longitude: +this.props.shop.getLongitude()}
+                            )
+                            this.setState({
+                                userLocation: {
+                                    latitude: position.coords.latitude, 
+                                    longitude: position.coords.longitude
+                                },
+                                fetchedDistance : distance
+                            })
+                        },
+                        (error) => {
+                            // See error code charts below.
+                            console.log(error.code, error.message);
+                            Alert.alert(
+                                "User Location",
+                                "An error occured, please try again..."
+                            )
+                        },
+                        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+                    );
+                }
+
+            }
+        ).catch(
+            (error) => {
+                Alert.alert(
+                    "Location Permission",
+                    "An error occured, please try again..."
+                )
+            }
+        )
     }
 
     private _setOrderingModalVisible(visible: boolean) {
@@ -46,10 +110,10 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
     }
 
     private _renderOrderPlacementStatus = () => {
-        console.log("Render place order " + this.state.hasPlacedOrder );
-        if(this.state.hasPlacedOrder == true){
-            return <FontAwesome name="check-circle" color="green" size={30}/>;
-        }else
+        console.log("Render place order " + this.state.hasPlacedOrder);
+        if (this.state.hasPlacedOrder == true) {
+            return <FontAwesome name="check-circle" color="green" size={30} />;
+        } else
             return (
                 <TouchableOpacity onPress={this._placeOrder}>
                     <Text style={styles.modal_order_pay_btn} >Place Order</Text>
@@ -57,7 +121,54 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
             );
     }
 
-    
+    private _renderProductPriceContainer = () => {
+        if (this.props.product.getReduction() > 0) {
+            const p = (
+                this.props.product.getPrice() -
+                this.props.product.getPrice() * this.props.product.getReduction()
+            ).toFixed(2)
+
+            return (
+                <View style={styles.modal_product_price_container}>
+                    <Text style={styles.modal_product_price}>{p} $</Text>
+                    <Text style={styles.modal_product_price_old}>{this.props.product.getPrice()} $</Text>
+                </View>
+            )
+        }
+        return (
+            <View style={styles.modal_product_price_container}>
+                <Text style={styles.modal_product_price}>{this.props.product.getPrice()} $</Text>
+            </View>
+
+        )
+    }
+
+    private _renderProductImage = () => {
+        const image = this.props.product.getMainImage();
+        if (image != undefined && image != null) {
+            return (
+                <Image
+                    source={{ uri: image }}
+                    style={{ width: 100, height: 100, resizeMode: 'contain' }}
+                />
+            )
+        } else {
+            return (
+                <Image
+                    source={main_product_image}
+                    style={{ width: 100, height: 100, resizeMode: 'contain' }}
+                />
+            )
+        }
+    }
+
+    private _reanderSafeProductName = (name: string) => {
+        if (name.length > 20)
+            return name.substring(0, 17) + "..."
+        else
+            return name
+    }
+
     render() {
         return (
             <Modal
@@ -89,52 +200,85 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
                                 <MapView
                                     style={{ flex: 1 }}
                                     provider={PROVIDER_GOOGLE}
-                        
+                                    showsUserLocation={true}
+                                    zoomControlEnabled={true}
+                                    minZoomLevel={20}
                                     initialRegion={{
-                                        latitude: 37.78825,
-                                        longitude: -122.4324,
+                                        latitude: +this.props.shop.getLatitude(),
+                                        longitude: +this.props.shop.getLongitude(),
                                         latitudeDelta: 0.0922,
                                         longitudeDelta: 0.0421,
 
-                                    }}
-                                ></MapView>
+                                    }}>
+
+                                    <Marker
+                                        title={this.props.shop.getName()}
+                                        description={this.props.shop.getDescription()}
+                                        pinColor={"#007ACC"}
+                                        coordinate={{
+                                            latitude: +this.props.shop.getLatitude(),
+                                            longitude: +this.props.shop.getLongitude()
+                                        }}
+                                    />
+
+                                    {/* TODO Activate the enterprise goole direction */}
+                                    <MapViewDirections
+                                        apikey={GOOGLE_API_KEY}
+                                        origin={this.state.userLocation}
+                                        destination={{
+                                            latitude: +this.props.shop.getLatitude(),
+                                            longitude: +this.props.shop.getLongitude()
+                                        }}
+                                        strokeWidth={1}
+                                        optimizeWaypoints={true}
+                                        onReady={
+                                            (result) => {
+                                                console.log(result)
+                                                this.setState({
+                                                    fetchedDistance: result.distance,
+                                                    fetchedDuration: result.duration,
+                                                })
+                                            }
+                                        }
+                                    />
+
+                                </MapView>
 
                                 <View style={{
                                     margin: 20,
                                     display: 'flex',
-                                    flexDirection:'row'}}>
+                                    flexDirection: 'row'
+                                }}>
                                     <View style={{
                                         display: 'flex',
-                                        flexDirection:'row'}}>
+                                        flexDirection: 'row'
+                                    }}>
                                         <MaterialCommunityIcons name="map-marker-distance" size={20} />
-                                        <Text style={{marginLeft: 15}}>1 km</Text>
+                                        <Text style={{ marginLeft: 15 }}>{this.state.fetchedDistance} m</Text>
                                     </View>
                                     <View style={{
                                         marginLeft: 20,
                                         display: 'flex',
-                                        flexDirection:'row'}}>
+                                        flexDirection: 'row'
+                                    }}>
                                         <AntDesign name="clockcircleo" size={20} />
-                                        <Text style={{marginLeft: 15}}>10 min</Text>
+                                        <Text style={{ marginLeft: 15 }}>-- min</Text>
                                     </View>
                                 </View>
 
                                 <View style={styles.modal_image_data_container}>
                                     <View style={styles.modal_image_container}>
-                                        <Image
-                                            source={main_product_image}
-                                            style={{ width: 100, height: 100, resizeMode: 'contain' }}
-                                        />
+                                        {this._renderProductImage()}
                                     </View>
                                     <View style={styles.modal_product_description_container}>
                                         <View style={styles.modal_product_name_container}>
-                                            <Text style={styles.modal_product_name}>Headphone ASSUR</Text>
+                                            <Text style={styles.modal_product_name}>
+                                                {this._reanderSafeProductName(this.props.product.getName())}
+                                            </Text>
                                         </View>
-                                        <View style={styles.modal_product_price_container}>
-                                            <Text style={styles.modal_product_price}>25 $</Text>
-                                            <Text style={styles.modal_product_price_old}>30 $</Text>
-                                        </View>
+                                        {this._renderProductPriceContainer()}
                                         <View>
-                                            { this._renderOrderPlacementStatus() }
+                                            {this._renderOrderPlacementStatus()}
                                         </View>
                                     </View>
                                 </View>
@@ -192,7 +336,7 @@ const styles = StyleSheet.create({
 
 
     modal_order_pay_btn: {
-        backgroundColor: 'blue',
+        backgroundColor: '#007ACC',
         color: '#FFFFFF',
         padding: 10,
         textAlign: 'center',
@@ -237,7 +381,7 @@ const styles = StyleSheet.create({
 
 
     modal_product_name_container: {
-        
+
     },
     modal_product_price_container: {
         display: 'flex',
