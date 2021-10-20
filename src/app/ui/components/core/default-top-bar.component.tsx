@@ -10,7 +10,8 @@ const iconName: string = "ios-information-circle";
 interface IProps {
     toggler: Function,
     filterProductsByNameHandler: Function,
-    locationClick: Function
+    locationClick: Function,
+    reloadHandler: Function
 }
 
 interface IState {
@@ -113,7 +114,16 @@ class DefaultTopBarComponent extends React.Component<IProps, IState> {
                 {this._renderSearchInput()}
                 <View style={{ flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
                     {this._renderSearchIcon()}
+                    <TouchableOpacity onPress={
+                        () => {
+                            if (this.props.reloadHandler != undefined){
+                                this.props.reloadHandler()
+                            }
+                        }
+                    }>
                     <MaterialIcons name={"filter-list"} size={30} color={"#FFFFFF"} style={{ marginLeft: 10 }} />
+                    </TouchableOpacity>
+                    
                 </View>
             </View>
         )

@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
         marginBottom: 15,
         borderRadius: 10,
-        shadowColor: "#000",
+        /*shadowColor: "#000",
         shadowOffset: {
             width: 0,
             height: 2,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.23,
         shadowRadius: 2.62,
 
-        elevation: 4
+        elevation: 4*/
     },
     product_image_container: {
         padding: 10,

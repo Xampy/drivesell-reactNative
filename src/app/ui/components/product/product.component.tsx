@@ -63,7 +63,7 @@ class ProductComponent extends React.Component<IProps, IState> {
                         <Image
                             source={ (
                                 this.props.shop.getImageUrl() ==  null || 
-                                this.props.shop.getImageUrl().length < 1)?  user_icon : this.props.shop.getImageUrl()}
+                                this.props.shop.getImageUrl().length < 1)?  user_icon : {uri: this.props.shop.getImageUrl()}}
                             style={styles.user_icon}
                         />
                     </View>
@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
 
     user_icon: {
         width: 50,
-        height: 50
+        height: 50,
+        borderRadius: 25
     },
 
 

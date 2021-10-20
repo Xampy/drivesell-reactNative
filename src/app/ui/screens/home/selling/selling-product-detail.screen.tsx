@@ -319,7 +319,8 @@ const styles = StyleSheet.create({
 
     user_icon: {
         width: 50,
-        height: 50
+        height: 50,
+        borderRadius: 25
     },
 
     user_image_container: {

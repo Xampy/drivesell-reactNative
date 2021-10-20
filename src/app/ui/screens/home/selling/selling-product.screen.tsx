@@ -238,6 +238,7 @@ class SellingProductScreen extends React.Component<IProps, IState> {
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}>
                     <DefaultTopBarComponent
+                        reloadHandler={this._getLocalShopsProducts}
                         filterProductsByNameHandler={this._filterProductsByName}
                         locationClick={this._handleLocationClick}
                         toggler={this._toggleDrawerNavigation} ></DefaultTopBarComponent>
