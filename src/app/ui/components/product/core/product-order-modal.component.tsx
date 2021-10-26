@@ -10,6 +10,7 @@ import ShopEntity from '../../../../domain/entity/shop.entity';
 import { getGPSDistance, requestLocationPermission } from '../../../location.tools';
 import Geolocation from 'react-native-geolocation-service';
 import MapViewDirections from 'react-native-maps-directions';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 const main_product_image = require("../../../../../assets/img/product/product_main.jpg");
 
@@ -23,7 +24,7 @@ interface IProps {
     hasWantToOrder: boolean,
     onRequestCloseCallback: Function,
 
-    placeOrder: Function,
+    placeOrder: (shop: ShopEntity, product: ShopProductEntity) => any,
     hasPlacedOrder: boolean
 }
 
@@ -106,7 +107,8 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
 
     private _placeOrder = () => {
         console.log("In modal " + this.state.hasPlacedOrder);
-        this.props.placeOrder();
+        //[FEATURE] let user to place order in next version
+        //this.props.placeOrder(this.props.shop, this.props.product);
     }
 
     private _renderOrderPlacementStatus = () => {
@@ -202,7 +204,7 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
                                     provider={PROVIDER_GOOGLE}
                                     showsUserLocation={true}
                                     zoomControlEnabled={true}
-                                    minZoomLevel={20}
+                                    minZoomLevel={15}
                                     initialRegion={{
                                         latitude: +this.props.shop.getLatitude(),
                                         longitude: +this.props.shop.getLongitude(),
@@ -261,7 +263,7 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
                                         display: 'flex',
                                         flexDirection: 'row'
                                     }}>
-                                        <AntDesign name="clockcircleo" size={20} />
+                                        <FontAwesome5 name="walking" size={20} />
                                         <Text style={{ marginLeft: 15 }}>-- min</Text>
                                     </View>
                                 </View>
@@ -278,7 +280,10 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
                                         </View>
                                         {this._renderProductPriceContainer()}
                                         <View>
-                                            {this._renderOrderPlacementStatus()}
+                                            {/*this._renderOrderPlacementStatus()*/}
+                                            <Text>
+                                                {this.props.product.getDescription()}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>

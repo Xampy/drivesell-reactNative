@@ -232,6 +232,8 @@ class SellingProductScreen extends React.Component<IProps, IState> {
                     showModal={true} />
             )
     }
+
+    
     render() {
         return (
             <View style={styles.container}>

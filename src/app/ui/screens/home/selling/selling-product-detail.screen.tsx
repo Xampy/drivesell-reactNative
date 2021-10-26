@@ -9,6 +9,7 @@ import Octicons from 'react-native-vector-icons/Octicons';
 import ShopEntity from '../../../../domain/entity/shop.entity';
 import ShopProductEntity from '../../../../domain/entity/product.entity';
 import BackWithTitleTopBarComponent from '../../../components/core/back-with-title-top-bar.component';
+import { requestLocationPermission } from '../../../location.tools';
 
 
 const user_icon = require('../../../../../assets/img/user_icon.png');
@@ -49,6 +50,8 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
     private shop: ShopEntity;
     private shopProduct: ShopProductEntity;
 
+    private hasLocationPermission: boolean;
+
     constructor(props: any) {
         super(props);
 
@@ -61,6 +64,23 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
         console.log(this.props);
         this.shop = this.props.route.params.shop;
         this.shopProduct = this.props.route.params.product;
+
+        this.hasLocationPermission = false;
+    }
+
+    componentDidMount(){
+        requestLocationPermission()
+        .then(
+            (value) => {
+                if (value != null){
+                    this.hasLocationPermission = value;
+                }
+            }
+        ).catch(
+            (err) => {
+                console.log(err);
+            }
+        )
     }
 
 
@@ -71,7 +91,7 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
                     style={styles.bottom_float_buy_action_container}
                     onPress={() => { this._setOrderingModalVisible(true) }}>
                     <View style={styles.buy_text_container}>
-                        <Text style={styles.buy_text} >Order now</Text>
+                        <Text style={styles.buy_text} >View on Map</Text>
                     </View>
                 </TouchableOpacity>
             )
@@ -83,7 +103,7 @@ class SellingProductDetailScreen extends React.Component<IProps, IState> {
     }
 
 
-    private _handleOrderPlacement = () => {
+    private _handleOrderPlacement = (shop: ShopEntity, product: ShopProductEntity) => {
         console.log("Render order +");
         this.setState({ hasPlacedOrder: true });
 

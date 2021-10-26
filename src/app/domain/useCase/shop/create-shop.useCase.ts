@@ -43,6 +43,14 @@ class CreateShopUseCase {
                                     userId: useCaseRequest.getUserId(),
                                     shopId: s.getId()
                                 }
+                            ).then(
+                                () => {
+
+                                }
+                            ).catch(
+                                (err) => {
+                                    console.log(err);
+                                }
                             )
                         this.handleFirebaseCreateSuccess(
                             result, apiFactory,
