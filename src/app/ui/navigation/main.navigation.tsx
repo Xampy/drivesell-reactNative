@@ -96,9 +96,9 @@ const MainDrawerNavigator = () => {
                 <MainDrawer.Screen
                     name="Discussions"
                     component={MessagingStackNavigator} />
-                <MainDrawer.Screen
+                {/*<MainDrawer.Screen
                     name="Buy Orders"
-                    component={BuyOrdersStackNavigator} />
+                component={BuyOrdersStackNavigator} />*/}
                 <MainDrawer.Screen
                     name="Profile"
                     component={SearchScreen} />
@@ -126,9 +126,9 @@ const MainDrawerNavigator = () => {
                 <MainDrawer.Screen
                     name="My Shops"
                     component={MyShopsStackNavigator} />
-                <MainDrawer.Screen
+                {/*<MainDrawer.Screen
                     name="Sell Orders"
-                    component={SellOrdersStackNavigator} />
+                component={SellOrdersStackNavigator} />*/}
                 <MainDrawer.Screen
                     name="Settings"
                     component={SearchScreen} />

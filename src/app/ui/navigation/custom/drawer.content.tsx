@@ -28,10 +28,10 @@ class CustomDrawerContent extends React.Component {
                             <Text style={ styles.stat_value } >1</Text>
                             <Text style={ styles.stat_field } >Shop(s)</Text>
                         </View>
-                        <View style={ [styles.stat_container, , {marginLeft: 10}]}>
+                        {/*<View style={ [styles.stat_container, , {marginLeft: 10}]}>
                             <Text style={ styles.stat_value } >3</Text>
                             <Text style={ styles.stat_field } >Sell order(s)</Text>
-                        </View>
+                        </View>*/}
                     </View>
                 </View>
 

@@ -242,6 +242,11 @@ class ProductOrderModalComponent extends React.Component<IProps, IState> {
                                                 })
                                             }
                                         }
+                                        onError={
+                                            () => {
+                                                //
+                                            }
+                                        }
                                     />
 
                                 </MapView>

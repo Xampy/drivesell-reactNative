@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MultipleChoiceItemComponent from '../core/multiple-choice/multiple-choice-item.component';
 import MultipleChoiceItemContainerComponent from '../core/multiple-choice/multiple-choice-items-container.component';
@@ -93,7 +94,7 @@ class ShopListItemComponent extends React.Component<IProps, IState> {
                             display: 'flex',
                             flexDirection: 'row'
                         }}>
-                            <AntDesign name="clockcircleo" size={20} />
+                            <FontAwesome5 name="walking" size={20} />
                             <Text style={{ marginLeft: 15 }}>{this.props.time} min</Text>
                         </View>
                     </View>
@@ -111,16 +112,9 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         borderRadius: 20,
-        shadowColor: "#000",
         backgroundColor: "#FFFFFF",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.23,
-        shadowRadius: 2.62,
-
-        elevation: 4
+        borderBottomColor: "gray",
+        borderBottomWidth: 1
     },
     shop_item_image_container: {
         flex: 1
